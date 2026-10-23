@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Tag matches app version
+        run: |
+          pkg="v$(node -p "require('./package.json').version")"
+          conf="v$(node -p "require('./src-tauri/tauri.conf.json').version")"
+          if [ "$GITHUB_REF_NAME" != "$pkg" ] || [ "$GITHUB_REF_NAME" != "$conf" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json ($pkg) / tauri.conf.json ($conf)"
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - run: npm ci
+      - run: npm test
+
+      - uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: Plot ${{ github.ref_name }}
+          releaseDraft: false
+          generateReleaseNotes: true
+          args: --target universal-apple-darwin --bundles app,dmg
+          releaseBody: |
+            Universal macOS build (Apple Silicon and Intel).
+
+            **Install:** download `Plot_*_universal.dmg`, open it and drag `Plot.app` into Applications.
+
+            The app isn't notarized by Apple, so macOS will refuse to open it the first time ("can't be verified" or "is damaged"). Clear the download flag once in Terminal:
+
+            ```
+            xattr -dr com.apple.quarantine /Applications/Plot.app
+            ```

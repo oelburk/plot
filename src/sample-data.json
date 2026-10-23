@@ -1,0 +1,716 @@
+{
+  "app": "plot",
+  "version": 1,
+  "exported": "2026-10-20T00:00:00.000Z",
+  "disciplines": [
+    {
+      "code": "FE",
+      "tag": "FE",
+      "name": "Frontend",
+      "hue": 250
+    },
+    {
+      "code": "BE",
+      "tag": "BE",
+      "name": "Backend",
+      "hue": 300
+    },
+    {
+      "code": "UX",
+      "tag": "UX",
+      "name": "UI/UX",
+      "hue": 20
+    },
+    {
+      "code": "OT",
+      "tag": "OTH",
+      "name": "Other",
+      "hue": null
+    }
+  ],
+  "projects": [
+    {
+      "id": "p1",
+      "name": "Atlas portal relaunch",
+      "desc": "Rebuild of the customer self-service portal: auth, billing and a new design system.",
+      "edited": "2h ago",
+      "epics": [
+        {
+          "id": "e9",
+          "name": "Discovery & research",
+          "open": false,
+          "tasks": [
+            {
+              "id": "t1",
+              "title": "Stakeholder interviews",
+              "d": "UX",
+              "s": 2,
+              "notes": "8 interviews across support, sales and finance. Recordings in the shared drive."
+            },
+            {
+              "id": "t2",
+              "title": "Audit current portal analytics",
+              "d": "OT",
+              "s": 2,
+              "notes": ""
+            },
+            {
+              "id": "t3",
+              "title": "Competitor teardown",
+              "d": "UX",
+              "s": 2,
+              "notes": ""
+            },
+            {
+              "id": "t4",
+              "title": "Tech stack decision",
+              "d": "BE",
+              "s": 2,
+              "notes": "Node + Postgres on the back, Next.js on the front."
+            },
+            {
+              "id": "t5",
+              "title": "Accessibility baseline audit",
+              "d": "UX",
+              "s": 2,
+              "notes": ""
+            },
+            {
+              "id": "t6",
+              "title": "Define success metrics",
+              "d": "OT",
+              "s": 2,
+              "notes": ""
+            },
+            {
+              "id": "t7",
+              "title": "Journey map: billing flows",
+              "d": "UX",
+              "s": 1,
+              "notes": ""
+            },
+            {
+              "id": "t8",
+              "title": "Synthesize findings",
+              "d": "UX",
+              "s": 0,
+              "notes": ""
+            }
+          ]
+        },
+        {
+          "id": "e18",
+          "name": "Design system & UI",
+          "open": false,
+          "tasks": [
+            {
+              "id": "t10",
+              "title": "Tokens: color, type, spacing",
+              "d": "UX",
+              "s": 2,
+              "notes": ""
+            },
+            {
+              "id": "t11",
+              "title": "Component inventory",
+              "d": "UX",
+              "s": 2,
+              "notes": ""
+            },
+            {
+              "id": "t12",
+              "title": "Storybook setup",
+              "d": "FE",
+              "s": 2,
+              "notes": ""
+            },
+            {
+              "id": "t13",
+              "title": "Build tokens package",
+              "d": "FE",
+              "s": 1,
+              "notes": ""
+            },
+            {
+              "id": "t14",
+              "title": "Form patterns",
+              "d": "UX",
+              "s": 1,
+              "notes": ""
+            },
+            {
+              "id": "t15",
+              "title": "Table & list patterns",
+              "d": "UX",
+              "s": 1,
+              "notes": ""
+            },
+            {
+              "id": "t16",
+              "title": "Dark mode audit",
+              "d": "UX",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t17",
+              "title": "Hand-off specs",
+              "d": "UX",
+              "s": 0,
+              "notes": ""
+            }
+          ]
+        },
+        {
+          "id": "e27",
+          "name": "Accounts & auth",
+          "open": true,
+          "tasks": [
+            {
+              "id": "t19",
+              "title": "Login screens",
+              "d": "UX",
+              "s": 2,
+              "notes": ""
+            },
+            {
+              "id": "t20",
+              "title": "SSO via OIDC",
+              "d": "BE",
+              "s": 2,
+              "notes": ""
+            },
+            {
+              "id": "t21",
+              "title": "Session handling",
+              "d": "BE",
+              "s": 1,
+              "notes": "Refresh tokens rotate every 15 min. Confirm idle timeout with security before shipping."
+            },
+            {
+              "id": "t22",
+              "title": "Password reset flow",
+              "d": "FE",
+              "s": 1,
+              "notes": ""
+            },
+            {
+              "id": "t23",
+              "title": "2FA enrollment API",
+              "d": "BE",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t24",
+              "title": "2FA screens",
+              "d": "FE",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t25",
+              "title": "Rate limiting",
+              "d": "BE",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t26",
+              "title": "Audit log events",
+              "d": "BE",
+              "s": 0,
+              "notes": ""
+            }
+          ]
+        },
+        {
+          "id": "e37",
+          "name": "Billing",
+          "open": false,
+          "tasks": [
+            {
+              "id": "t28",
+              "title": "Billing flows UI",
+              "d": "UX",
+              "s": 1,
+              "notes": ""
+            },
+            {
+              "id": "t29",
+              "title": "Invoice list API",
+              "d": "BE",
+              "s": 1,
+              "notes": ""
+            },
+            {
+              "id": "t30",
+              "title": "Invoice PDF rendering",
+              "d": "BE",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t31",
+              "title": "Payment method CRUD",
+              "d": "BE",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t32",
+              "title": "Billing overview page",
+              "d": "FE",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t33",
+              "title": "Invoice detail view",
+              "d": "FE",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t34",
+              "title": "Payment form",
+              "d": "FE",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t35",
+              "title": "Tax / VAT handling",
+              "d": "BE",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t36",
+              "title": "Legal copy review",
+              "d": "OT",
+              "s": 0,
+              "notes": ""
+            }
+          ]
+        },
+        {
+          "id": "e45",
+          "name": "Launch",
+          "open": false,
+          "tasks": [
+            {
+              "id": "t38",
+              "title": "Data migration script",
+              "d": "BE",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t39",
+              "title": "E2E test suite",
+              "d": "FE",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t40",
+              "title": "Performance budget",
+              "d": "FE",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t41",
+              "title": "Analytics events",
+              "d": "FE",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t42",
+              "title": "Help center articles",
+              "d": "OT",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t43",
+              "title": "Beta cohort invites",
+              "d": "OT",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t44",
+              "title": "Release notes",
+              "d": "OT",
+              "s": 0,
+              "notes": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "name": "Marketing site v3",
+      "desc": "New positioning, pricing page and blog migration.",
+      "edited": "yesterday",
+      "epics": [
+        {
+          "id": "e50",
+          "name": "Messaging & copy",
+          "open": true,
+          "tasks": [
+            {
+              "id": "t46",
+              "title": "Positioning workshop",
+              "d": "OT",
+              "s": 2,
+              "notes": ""
+            },
+            {
+              "id": "t47",
+              "title": "Homepage copy",
+              "d": "OT",
+              "s": 2,
+              "notes": ""
+            },
+            {
+              "id": "t48",
+              "title": "Pricing copy",
+              "d": "OT",
+              "s": 1,
+              "notes": ""
+            },
+            {
+              "id": "t49",
+              "title": "Brand refresh moodboard",
+              "d": "UX",
+              "s": 2,
+              "notes": ""
+            }
+          ]
+        },
+        {
+          "id": "e57",
+          "name": "Pages",
+          "open": true,
+          "tasks": [
+            {
+              "id": "t51",
+              "title": "Homepage design",
+              "d": "UX",
+              "s": 2,
+              "notes": ""
+            },
+            {
+              "id": "t52",
+              "title": "Pricing page design",
+              "d": "UX",
+              "s": 1,
+              "notes": ""
+            },
+            {
+              "id": "t53",
+              "title": "Homepage build",
+              "d": "FE",
+              "s": 1,
+              "notes": ""
+            },
+            {
+              "id": "t54",
+              "title": "Pricing build",
+              "d": "FE",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t55",
+              "title": "Customer stories template",
+              "d": "FE",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t56",
+              "title": "Responsive QA",
+              "d": "FE",
+              "s": 0,
+              "notes": ""
+            }
+          ]
+        },
+        {
+          "id": "e62",
+          "name": "CMS migration",
+          "open": false,
+          "tasks": [
+            {
+              "id": "t58",
+              "title": "Content model",
+              "d": "BE",
+              "s": 2,
+              "notes": ""
+            },
+            {
+              "id": "t59",
+              "title": "Migrate blog posts",
+              "d": "BE",
+              "s": 1,
+              "notes": ""
+            },
+            {
+              "id": "t60",
+              "title": "Redirect map",
+              "d": "OT",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t61",
+              "title": "Preview environments",
+              "d": "BE",
+              "s": 0,
+              "notes": ""
+            }
+          ]
+        },
+        {
+          "id": "e66",
+          "name": "Launch",
+          "open": false,
+          "tasks": [
+            {
+              "id": "t63",
+              "title": "SEO checklist",
+              "d": "OT",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t64",
+              "title": "Analytics tags",
+              "d": "FE",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t65",
+              "title": "Go-live checklist",
+              "d": "OT",
+              "s": 0,
+              "notes": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "name": "Mobile onboarding",
+      "desc": "Cut drop-off in the first-run experience.",
+      "edited": "3 days ago",
+      "epics": [
+        {
+          "id": "e70",
+          "name": "Research",
+          "open": true,
+          "tasks": [
+            {
+              "id": "t67",
+              "title": "Funnel analysis",
+              "d": "OT",
+              "s": 2,
+              "notes": ""
+            },
+            {
+              "id": "t68",
+              "title": "User interviews",
+              "d": "UX",
+              "s": 1,
+              "notes": ""
+            },
+            {
+              "id": "t69",
+              "title": "Onboarding benchmarks",
+              "d": "UX",
+              "s": 2,
+              "notes": ""
+            }
+          ]
+        },
+        {
+          "id": "e76",
+          "name": "Flows",
+          "open": true,
+          "tasks": [
+            {
+              "id": "t71",
+              "title": "Welcome screens",
+              "d": "UX",
+              "s": 1,
+              "notes": ""
+            },
+            {
+              "id": "t72",
+              "title": "Permissions priming",
+              "d": "UX",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t73",
+              "title": "Account setup flow",
+              "d": "UX",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t74",
+              "title": "Empty states",
+              "d": "UX",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t75",
+              "title": "Prototype test",
+              "d": "UX",
+              "s": 0,
+              "notes": ""
+            }
+          ]
+        },
+        {
+          "id": "e82",
+          "name": "Build",
+          "open": false,
+          "tasks": [
+            {
+              "id": "t77",
+              "title": "Onboarding state API",
+              "d": "BE",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t78",
+              "title": "Feature flags",
+              "d": "BE",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t79",
+              "title": "Welcome screens",
+              "d": "FE",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t80",
+              "title": "Push opt-in",
+              "d": "FE",
+              "s": 0,
+              "notes": ""
+            },
+            {
+              "id": "t81",
+              "title": "Event tracking",
+              "d": "FE",
+              "s": 0,
+              "notes": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p4",
+      "name": "Internal KPI dashboard",
+      "desc": "Weekly numbers for the leadership team.",
+      "edited": "Sep 28",
+      "epics": [
+        {
+          "id": "e87",
+          "name": "Data pipeline",
+          "open": false,
+          "tasks": [
+            {
+              "id": "t83",
+              "title": "Warehouse views",
+              "d": "BE",
+              "s": 2,
+              "notes": ""
+            },
+            {
+              "id": "t84",
+              "title": "Nightly sync job",
+              "d": "BE",
+              "s": 2,
+              "notes": ""
+            },
+            {
+              "id": "t85",
+              "title": "Metric definitions",
+              "d": "OT",
+              "s": 2,
+              "notes": ""
+            },
+            {
+              "id": "t86",
+              "title": "Access control",
+              "d": "BE",
+              "s": 2,
+              "notes": ""
+            }
+          ]
+        },
+        {
+          "id": "e93",
+          "name": "Dashboard",
+          "open": false,
+          "tasks": [
+            {
+              "id": "t88",
+              "title": "Layout & charts",
+              "d": "UX",
+              "s": 2,
+              "notes": ""
+            },
+            {
+              "id": "t89",
+              "title": "Chart components",
+              "d": "FE",
+              "s": 2,
+              "notes": ""
+            },
+            {
+              "id": "t90",
+              "title": "Filters & date range",
+              "d": "FE",
+              "s": 2,
+              "notes": ""
+            },
+            {
+              "id": "t91",
+              "title": "PDF snapshot",
+              "d": "FE",
+              "s": 2,
+              "notes": ""
+            },
+            {
+              "id": "t92",
+              "title": "Sign-off review",
+              "d": "OT",
+              "s": 2,
+              "notes": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

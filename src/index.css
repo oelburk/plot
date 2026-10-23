@@ -1,0 +1,144 @@
+@import 'tailwindcss';
+
+@custom-variant tauri (&:where(.tauri *));
+
+@theme static {
+  --color-*: initial;
+  --color-white: #fff;
+
+  --color-app: #0e0f12;
+  --color-sidebar: #0a0b0d;
+  --color-card: #131418;
+  --color-tree: #111216;
+  --color-inset: #0b0c0f;
+  --color-search: #121317;
+  --color-overlay: #15161a;
+  --color-panel: #0b0c0e;
+  --color-raised: #1a1b20;
+  --color-focused: #17181d;
+
+  --color-fg: #ececee;
+  --color-task: #e4e5e9;
+  --color-strong: #d6d7db;
+  --color-sub: #c4c5cb;
+  --color-secondary: #a1a2aa;
+  --color-tertiary: #8b8c94;
+  --color-muted: #7d7e86;
+  --color-faint: #6f7078;
+  --color-label: #6a6b73;
+  --color-index: #5f6068;
+  --color-sep: #4a4b52;
+  --color-dim: #45464d;
+
+  --color-done: oklch(0.8 0.14 150);
+  --color-done-fg: oklch(0.86 0.13 150);
+  --color-doing: oklch(0.82 0.13 80);
+  --color-doing-fg: oklch(0.87 0.12 80);
+  --color-danger: oklch(0.74 0.14 25);
+  --color-danger-fg: oklch(0.8 0.12 25);
+  --color-select: oklch(0.78 0.1 250);
+
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+
+  --spacing: 1px;
+
+  --text-9_5: 9.5px;
+  --text-10: 10px;
+  --text-10_5: 10.5px;
+  --text-11: 11px;
+  --text-11_5: 11.5px;
+  --text-12: 12px;
+  --text-12_5: 12.5px;
+  --text-13: 13px;
+  --text-13_5: 13.5px;
+  --text-14: 14px;
+  --text-15: 15px;
+  --text-16: 16px;
+  --text-17: 17px;
+  --text-18: 18px;
+  --text-20: 20px;
+  --text-22: 22px;
+  --text-24: 24px;
+  --text-26: 26px;
+  --text-30: 30px;
+  --text-46: 46px;
+
+  --radius-1: 1px;
+  --radius-1_5: 1.5px;
+  --radius-2: 2px;
+  --radius-3: 3px;
+  --radius-4: 4px;
+  --radius-5: 5px;
+  --radius-6: 6px;
+  --radius-7: 7px;
+  --radius-8: 8px;
+  --radius-9: 9px;
+  --radius-10: 10px;
+  --radius-14: 14px;
+  --radius-16: 16px;
+
+  --shadow-overlay: 0 30px 90px rgba(0, 0, 0, 0.6);
+  --default-transition-timing-function: ease;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    overflow: hidden;
+    background: var(--color-app);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+  button,
+  input,
+  textarea {
+    line-height: normal;
+  }
+  /* The prototype styles mono text with the font: shorthand, which resets line-height to normal. */
+  .font-mono {
+    line-height: normal;
+  }
+  button {
+    cursor: pointer;
+  }
+  ::placeholder {
+    color: var(--color-index);
+  }
+  ::selection {
+    background: oklch(0.78 0.1 250 / 0.35);
+  }
+  :focus-visible {
+    outline: 2px solid oklch(0.78 0.1 250 / 0.6);
+    outline-offset: 1px;
+  }
+  input:focus-visible,
+  textarea:focus-visible {
+    outline: none;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+}
