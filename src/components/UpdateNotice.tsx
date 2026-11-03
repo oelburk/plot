@@ -1,16 +1,27 @@
 import { isTauri } from '@tauri-apps/api/core';
 import { relaunch } from '@tauri-apps/plugin-process';
-import { check, type Update } from '@tauri-apps/plugin-updater';
+import { check } from '@tauri-apps/plugin-updater';
 import { useEffect, useState } from 'react';
+import { useStore } from '../store';
 import { btn } from './ui';
 
+/** Updates only run in the built desktop app, never in `tauri dev` or a browser. */
+export const canUpdate = () => isTauri() && !import.meta.env.DEV;
+
+/** Resolves to the update, or null when this is the latest version; the sidebar card shows whatever it finds. */
+export async function checkForUpdate() {
+  const update = await check();
+  useStore.setState({ update });
+  return update;
+}
+
 export function UpdateNotice() {
-  const [update, setUpdate] = useState<Update | null>(null);
+  const update = useStore((s) => s.update);
   const [state, setState] = useState<'ready' | 'installing' | 'failed'>('ready');
 
   useEffect(() => {
-    // ponytail: checks once per launch; offline or a failed check only reaches the console
-    if (isTauri() && !import.meta.env.DEV) check().then(setUpdate).catch(console.error);
+    // ponytail: checks once per launch (plus Settings → Check for updates); a failed check only reaches the console
+    if (canUpdate()) checkForUpdate().catch(console.error);
   }, []);
   if (!update) return null;
 

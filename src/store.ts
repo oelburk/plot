@@ -1,3 +1,4 @@
+import type { Update } from '@tauri-apps/plugin-updater';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { genTag, lookup, nextHue, usageCount } from './lib/disciplines';
@@ -29,6 +30,7 @@ interface Ui {
   addingEpic: boolean;
   overlay: Overlay;
   showHistory: boolean;
+  update: Update | null;
   undo: { label: string; snapshot: Data; at: number; back?: string } | null;
   drag: Drag | null;
   dropAt: { id: string; pos: DropPos } | null;
@@ -130,6 +132,7 @@ export const useStore = create<State>()(
         ...cleared,
         overlay: 'none',
         showHistory: false,
+        update: null,
         undo: null,
         drag: null,
         dropAt: null,
