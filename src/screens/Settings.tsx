@@ -9,6 +9,7 @@ import { exportCsv, exportJson, parseImport } from '../lib/io';
 import { allTasks } from '../lib/progress';
 import type { Discipline, Project } from '../lib/types';
 import { useStore } from '../store';
+import { version } from '../../package.json';
 
 /** Esc dismisses an inline confirmation instead of reaching the app's own Esc handling. */
 const onEsc = (cancel: () => void) => (e: KeyboardEvent) => {
@@ -100,6 +101,12 @@ export function Settings() {
 
         <Section label="DISCIPLINES">
           <Disciplines />
+        </Section>
+
+        <Section label="ABOUT">
+          <Row title="Version" desc="Plot checks for updates each time it opens.">
+            <span className="rounded-6 bg-white/4 px-8 py-4 font-mono text-11.5 font-medium leading-[normal] text-secondary">v{version}</span>
+          </Row>
         </Section>
 
         <ResetCard />
