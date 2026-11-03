@@ -45,7 +45,7 @@ function Tile({ epics, epic, index }: { epics: Epic[]; epic: Epic; index: number
     <div
       {...dragSource('epic', epic.id)}
       {...epicDrop(epics, epic, horizontal)}
-      onClick={(e) => e.detail < 2 && patch({ focus: focused ? null : epic.id, openTask: null, adding: null })}
+      onClick={(e) => e.detail < 2 && patch({ focus: focused ? null : epic.id, openTask: null, adding: null, showHistory: false })}
       className={`relative flex cursor-pointer flex-col gap-14 rounded-14 border px-16 pb-14 pt-16 transition-[border-color] duration-150 ${dragging ? 'opacity-40' : ''} ${pos === 'in' ? 'border-select bg-focused' : focused ? 'border-white/28 bg-focused' : 'border-white/6 bg-card hover:border-white/16'}`}
     >
       <DropLine pos={pos} x />
@@ -98,6 +98,7 @@ function MapSquare({ epicId, task }: { epicId: string; task: Task }) {
           focus: epicId,
           openTask: task.id,
           adding: null,
+          showHistory: false,
           ...(task.s === DONE ? { hideDone: false } : {}),
           ...(filter !== 'all' && task.d !== filter ? { filter: 'all' } : {}),
         });

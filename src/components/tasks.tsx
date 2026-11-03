@@ -1,6 +1,6 @@
 import { useState, type KeyboardEvent } from 'react';
 import { focusSoon, focusUndo, isImeKey } from '../lib/focus';
-import { pad, relativeTime } from '../lib/format';
+import { fullTime, pad, relativeTime } from '../lib/format';
 import type { Epic, Task, TaskComment } from '../lib/types';
 import { useStore } from '../store';
 import { Menu } from './Menu';
@@ -48,8 +48,6 @@ export function NotesPanel({ task, onRename, compact = false }: { task: Task; on
     </div>
   );
 }
-
-const fullTime = (iso: string) => new Date(iso).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
 
 function Comments({ task, compact }: { task: Task; compact: boolean }) {
   const { addComment } = useStore.getState();

@@ -31,6 +31,8 @@ There are no accounts, assignees, due dates, sprints or workflows. Your data is 
 - **⌘K for everything.** Jump between projects, switch views, export, or add a task without leaving the keyboard.
 - **Drag to re-arrange** epics and tasks, including moving a task into another epic.
 - **Notes and comments.** Notes describe a task; timestamped comments track how it's going.
+- **History.** A feed of every change to a project and when it happened, grouped by day.
+- **Edit project.** Rename a project, change its description or delete it from the top bar.
 - **Undo** after any delete.
 - **Portable data.** Export to JSON or CSV, and import a JSON export to restore or move machines.
 
@@ -47,6 +49,10 @@ There are no accounts, assignees, due dates, sprints or workflows. Your data is 
 **Comments.** Follow a task's progress without rewriting its notes.
 
 ![An expanded task with notes and three timestamped comments](docs/screenshots/comments.webp)
+
+**History.** See what changed in a project and when, newest first.
+
+![The History panel next to the tree, listing status changes, renames and additions grouped by day](docs/screenshots/history.webp)
 
 **All projects.** Each card shows its epics as bars, so you can see what's moving.
 

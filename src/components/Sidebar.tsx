@@ -10,7 +10,7 @@ export function Sidebar() {
   const projects = useStore((s) => s.projects);
   const screen = useStore((s) => s.screen);
   const activeId = useStore((s) => currentProject(s)?.id);
-  const { go, patch, renameProject } = useStore.getState();
+  const { go, patch, updateProject } = useStore.getState();
   const [renaming, setRenaming] = useState<string | null>(null);
 
   return (
@@ -65,7 +65,7 @@ export function Sidebar() {
             <InlineEdit
               key={p.id}
               value={p.name}
-              onSave={(v) => renameProject(p.id, v)}
+              onSave={(v) => updateProject(p.id, { name: v })}
               onDone={() => setRenaming(null)}
               returnTo={`[data-project-row="${p.id}"]`}
               className="h-31 text-13"

@@ -30,6 +30,15 @@ export interface Epic {
   open: boolean;
   tasks: Task[];
 }
+/** One line in a project's history: `{verb} {name} {to}`, e.g. Marked "Login form" as done. */
+export interface Activity {
+  id: string;
+  at: string;
+  verb: string;
+  name: string;
+  to?: string;
+  s?: Status;
+}
 export interface Project {
   id: string;
   name: string;
@@ -37,6 +46,7 @@ export interface Project {
   edited?: string;
   updatedAt?: string;
   epics: Epic[];
+  history?: Activity[];
 }
 export interface Data {
   projects: Project[];

@@ -57,6 +57,17 @@ describe('parseImport', () => {
     expect(parseImport(file('nope'))).toEqual({ ok: false, error: "Project 1, epic 1, task 1 has comments that aren't a list." });
     expect(parseImport(file([{ text: '' , at: 'x' }]))).toEqual({ ok: false, error: 'Project 1, epic 1, task 1, comment 1 needs text and a time.' });
   });
+  it('reads project history and rejects malformed entries', () => {
+    const file = (history: unknown) => JSON.stringify([{ name: 'P', epics: [], history }]);
+    const r = parseImport(file([{ id: 'h', at: '2026-11-03T10:00:00Z', verb: 'Marked', name: 'T', to: 'as done', s: 2 }, { at: 'x', verb: 'Edited the description', name: '' }]));
+    if (!r.ok) throw new Error(r.error);
+    const [a, b] = r.projects[0].history!;
+    expect(a).toEqual({ id: 'h', at: '2026-11-03T10:00:00Z', verb: 'Marked', name: 'T', to: 'as done', s: 2 });
+    expect(b).toMatchObject({ at: 'x', verb: 'Edited the description', name: '' });
+    expect(b.id).toBeTypeOf('string');
+    expect(parseImport(file('nope'))).toEqual({ ok: false, error: "Project 1 has a history that isn't a list." });
+    expect(parseImport(file([{ at: 'x', name: 'T' }]))).toEqual({ ok: false, error: 'Project 1, history entry 1 needs a verb, a name and a time.' });
+  });
   it('rejects bad input with a specific message', () => {
     expect(parseImport('nope')).toEqual({ ok: false, error: "That file isn't valid JSON." });
     expect(parseImport('{"foo":1}')).toEqual({ ok: false, error: "That file isn't a Plot export. Expected a projects list." });

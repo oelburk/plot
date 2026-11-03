@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { editedLabel, pad, plural, relativeTime } from './format';
+import { dayLabel, editedLabel, pad, plural, relativeTime } from './format';
 
 const now = new Date(2026, 9, 21, 12, 0, 0);
 const ago = (ms: number) => new Date(now.getTime() - ms).toISOString();
@@ -28,6 +28,13 @@ it('treats future and invalid timestamps as just now', () => {
   expect(relativeTime(ago(-5 * MIN), now)).toBe('just now');
   expect(relativeTime('not a date', now)).toBe('just now');
   expect(relativeTime('', now)).toBe('just now');
+});
+
+it('labels history days by calendar day', () => {
+  expect(dayLabel(new Date(2026, 9, 21, 0, 5).toISOString(), now)).toBe('Today');
+  expect(dayLabel(new Date(2026, 9, 20, 23, 55).toISOString(), now)).toBe('Yesterday');
+  expect(dayLabel(new Date(2026, 9, 14, 9, 0).toISOString(), now)).toBe('Wed, Oct 14');
+  expect(dayLabel(new Date(2025, 11, 31, 9, 0).toISOString(), now)).toBe('Wed, Dec 31, 2025');
 });
 
 it('prefers updatedAt and falls back to the legacy edited string', () => {
