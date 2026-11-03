@@ -78,6 +78,8 @@ Plot isn't notarized by Apple, so macOS refuses to open it the first time ("can'
 xattr -dr com.apple.quarantine /Applications/Plot.app
 ```
 
+From v0.3.0 on, Plot checks for a new release each time it opens and shows **Update available** in the sidebar. Click **Install and restart** to update in place; your data stays where it is.
+
 ## Develop
 
 Plot is Vite, React 19, TypeScript, Tailwind v4 and Zustand, wrapped in [Tauri 2](https://tauri.app).
@@ -110,7 +112,9 @@ Bump `version` in `package.json`, `src-tauri/tauri.conf.json` and `src-tauri/Car
 git tag v0.1.0 && git push origin v0.1.0
 ```
 
-The Release workflow builds a universal `.dmg` and publishes it on the GitHub Releases page.
+The Release workflow builds a universal `.dmg` and publishes it on the GitHub Releases page, together with a signed update bundle and the `latest.json` that installed apps check.
+
+Update bundles are signed with the key in `~/.tauri/plot.key` (its password is in `~/.tauri/plot.key.password`), stored in the repo secrets `TAURI_SIGNING_PRIVATE_KEY` and `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`. Keep a backup of the key: installed apps only accept updates signed with it, so if it's lost, everyone has to reinstall from a `.dmg` once.
 
 ### Docs
 

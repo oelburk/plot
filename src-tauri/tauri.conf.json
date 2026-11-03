@@ -29,6 +29,13 @@
     "active": true,
     "targets": ["app"],
     "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
-    "macOS": { "signingIdentity": "-" }
+    "macOS": { "signingIdentity": "-" },
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDM1REIyQ0I1RDI5N0YwOTQKUldTVThKZlN0U3piTmVaSGlpdElJYXpsTFpjLzdmOEpiL3lxRy80UVozK3FVcWdVb1NwaHg2b0kK",
+      "endpoints": ["https://github.com/oelburk/plot/releases/latest/download/latest.json"]
+    }
   }
 }

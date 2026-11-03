@@ -20,6 +20,7 @@ The guiding rule from the handoff still applies: **not another Jira**. If a feat
 | In scope from "Not designed yet" | Renaming and deleting projects and epics, an undo toast after deletes, and confirmation for Reset and Import |
 | Added 2026-10-22 | Reordering epics and tasks (including moving tasks between epics), renaming tasks, and task comments |
 | Added 2026-11-03 | Project history feed, and an Edit project dialog (name, description, delete) |
+| Added 2026-11-03 | In-app updates from GitHub Releases (`tauri-plugin-updater`) |
 | Out of scope | Reassigning tasks when removing a discipline, the narrow-width sidebar drawer, component tests |
 
 ## Architecture
@@ -176,6 +177,8 @@ Persistence: Zustand `persist` with the localStorage key `plot.v1`. It saves the
 - macOS title bar: `titleBarStyle: "Overlay"` with a hidden title. The sidebar runs to the top of the window, with the traffic-light buttons sitting over it.
   - The sidebar's top padding grows by 28px only when running in Tauri.
   - The sidebar top strip and the main area's top bar carry `data-tauri-drag-region`, so the window drags from there.
+- Updates: `tauri-plugin-updater` checks `https://github.com/oelburk/plot/releases/latest/download/latest.json` once per launch (not in `tauri dev` or the browser). When a newer version exists, an **Update available** card above Settings in the sidebar offers **Install and restart**, which downloads, verifies the minisign signature against the `pubkey` in `tauri.conf.json`, replaces the app and relaunches (`tauri-plugin-process`). A failed install says so on the card and offers Try again; a failed check only logs to the console.
+- The release workflow signs the `.app.tar.gz` update bundle with the `TAURI_SIGNING_PRIVATE_KEY` secret, and `tauri-action` uploads it with `latest.json`. Downloads made by the app don't get the quarantine flag, so updates don't need the `xattr` step.
 - The app icon is the logo mark: a rounded square with a light border, filled `#ececee` across the bottom 55%, on the `#0e0f12` app color. It's drawn as an SVG and turned into every icon size with `tauri icon`.
 
 ## Quality floor

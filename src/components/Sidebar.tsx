@@ -3,6 +3,7 @@ import { allTasks, stats } from '../lib/progress';
 import { currentProject, useStore } from '../store';
 import { InlineEdit } from './InlineEdit';
 import { Kbd, Ring } from './ui';
+import { UpdateNotice } from './UpdateNotice';
 
 const row = 'flex items-center gap-10 rounded-7 px-10 py-7 text-left text-13 hover:bg-white/4';
 
@@ -87,6 +88,7 @@ export function Sidebar() {
         })}
       </nav>
 
+      <UpdateNotice />
       <div className="flex flex-col gap-2 border-t border-white/6 pt-8">
         <button type="button" onClick={() => go('settings')} className={`${row} text-strong ${screen === 'settings' ? 'bg-white/6' : ''}`}>
           <span className="flex w-14 shrink-0 justify-center">
