@@ -1,13 +1,15 @@
+import type { Update } from '@tauri-apps/plugin-updater';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { genTag, nextHue, usageCount } from './lib/disciplines';
+import { genTag, lookup, nextHue, usageCount } from './lib/disciplines';
+import { plural } from './lib/format';
 import {
-  TODO, uid, type Data, type Detail, type Discipline, type Project, type Status, type Task, type ToggleStyle, type View,
+  TODO, uid, type Activity, type Data, type Detail, type Discipline, type Project, type Status, type Task, type ToggleStyle, type View,
 } from './lib/types';
 import sample from './sample-data.json';
 
 export type Screen = 'home' | 'project' | 'settings';
-export type Overlay = 'none' | 'new' | 'palette';
+export type Overlay = 'none' | 'new' | 'palette' | 'edit';
 export type Drag = { kind: 'epic' | 'task'; id: string };
 export type DropPos = 'before' | 'after' | 'in';
 
@@ -27,6 +29,8 @@ interface Ui {
   adding: string | null;
   addingEpic: boolean;
   overlay: Overlay;
+  showHistory: boolean;
+  update: Update | null;
   undo: { label: string; snapshot: Data; at: number; back?: string } | null;
   drag: Drag | null;
   dropAt: { id: string; pos: DropPos } | null;
@@ -49,7 +53,7 @@ interface Actions {
   toggleEpic: (epicId: string) => void;
   setAllOpen: (open: boolean) => void;
   createProject: (name: string, desc: string, epicNames: string[]) => void;
-  renameProject: (id: string, name: string) => void;
+  updateProject: (id: string, patch: Partial<Pick<Project, 'name' | 'desc'>>) => void;
   deleteProject: (id: string) => void;
   addDiscipline: (name: string) => void;
   updateDiscipline: (code: string, patch: Partial<Omit<Discipline, 'code'>>) => void;
@@ -69,6 +73,18 @@ export const currentProject = (s: Pick<State, 'projects' | 'pid'>): Project | un
 const findTask = (p: Project, id: string) => p.epics.flatMap((e) => e.tasks).find((t) => t.id === id);
 const findEpic = (p: Project, id: string) => p.epics.find((e) => e.id === id);
 const cleared = { focus: null, openTask: null, adding: null, addingEpic: false };
+
+const STATUS_TO = ['as not started', 'as in progress', 'as done'];
+// ponytail: a repeat of the last line (same verb and name) within a minute replaces it, so typing notes or clicking
+// through statuses logs once; capped at 500 lines per project, oldest dropped first
+const log = (p: Project, verb: string, name: string, to?: string, s?: Status) => {
+  const h = (p.history ??= []);
+  const entry: Activity = { id: uid(), at: new Date().toISOString(), verb, name, ...(to ? { to } : {}), ...(s !== undefined ? { s } : {}) };
+  const last = h.at(-1);
+  if (last && last.verb === verb && last.name === name && Date.now() - Date.parse(last.at) < 60_000) h[h.length - 1] = entry;
+  else h.push(entry);
+  if (h.length > 500) h.splice(0, h.length - 500);
+};
 
 export const useStore = create<State>()(
   persist(
@@ -115,6 +131,8 @@ export const useStore = create<State>()(
         filter: 'all',
         ...cleared,
         overlay: 'none',
+        showHistory: false,
+        update: null,
         undo: null,
         drag: null,
         dropAt: null,
@@ -125,16 +143,20 @@ export const useStore = create<State>()(
         addTask: (epicId, title, d, projectId) => {
           const id = projectId ?? pid();
           mutate((data) => {
-            const epic = data.projects.find((p) => p.id === id)?.epics.find((e) => e.id === epicId);
-            if (!epic) return;
+            const p = data.projects.find((p) => p.id === id);
+            const epic = p?.epics.find((e) => e.id === epicId);
+            if (!p || !epic) return;
             epic.open = true;
             epic.tasks.push({ id: uid(), title: title.trim(), d, s: TODO, notes: '' });
+            log(p, 'Added', title.trim(), `to ${epic.name}`);
           }, id);
         },
         setStatus: (taskId, s) =>
           inProject((p) => {
             const t = findTask(p, taskId);
-            if (t) t.s = s;
+            if (!t || t.s === s) return;
+            t.s = s;
+            log(p, 'Marked', t.title, STATUS_TO[s], s);
           }),
         updateTask: (taskId, patch) => {
           if (patch.title !== undefined) {
@@ -144,7 +166,11 @@ export const useStore = create<State>()(
           }
           inProject((p) => {
             const t = findTask(p, taskId);
-            if (t) Object.assign(t, patch);
+            if (!t) return;
+            if (patch.title !== undefined && patch.title !== t.title) log(p, 'Renamed', t.title, `to "${patch.title}"`);
+            if (patch.d !== undefined && patch.d !== t.d) log(p, 'Changed the owner of', t.title, `to ${lookup(get().disciplines, patch.d).name}`);
+            if (patch.notes !== undefined && patch.notes !== t.notes) log(p, 'Edited the notes on', patch.title ?? t.title);
+            Object.assign(t, patch);
           });
         },
         deleteTask: (taskId) => {
@@ -152,7 +178,10 @@ export const useStore = create<State>()(
           const t = p && findTask(p, taskId);
           if (!t) return;
           withUndo(`Deleted "${t.title}"`, (s) => ({
-            ...editProject(s, (p) => p.epics.forEach((e) => (e.tasks = e.tasks.filter((x) => x.id !== taskId)))),
+            ...editProject(s, (p) => {
+              p.epics.forEach((e) => (e.tasks = e.tasks.filter((x) => x.id !== taskId)));
+              log(p, 'Deleted', t.title);
+            }),
             openTask: null,
           }));
         },
@@ -161,36 +190,47 @@ export const useStore = create<State>()(
             const from = p.epics.find((e) => e.tasks.some((t) => t.id === taskId));
             const to = findEpic(p, epicId);
             if (!from || !to) return;
-            to.tasks.splice(index, 0, ...from.tasks.splice(from.tasks.findIndex((t) => t.id === taskId), 1));
+            const [t] = from.tasks.splice(from.tasks.findIndex((t) => t.id === taskId), 1);
+            to.tasks.splice(index, 0, t);
             to.open = true;
+            if (from !== to) log(p, 'Moved', t.title, `to ${to.name}`);
           }),
         addComment: (taskId, text) => {
           if (!text.trim()) return;
           inProject((p) => {
             const t = findTask(p, taskId);
-            if (t) (t.comments ??= []).push({ id: uid(), text: text.trim(), at: new Date().toISOString() });
+            if (!t) return;
+            (t.comments ??= []).push({ id: uid(), text: text.trim(), at: new Date().toISOString() });
+            log(p, 'Commented on', t.title);
           });
         },
         editComment: (taskId, commentId, text) => {
           if (!text.trim()) return;
           inProject((p) => {
-            const c = findTask(p, taskId)?.comments?.find((x) => x.id === commentId);
-            if (!c || c.text === text.trim()) return;
+            const t = findTask(p, taskId);
+            const c = t?.comments?.find((x) => x.id === commentId);
+            if (!t || !c || c.text === text.trim()) return;
             c.text = text.trim();
             c.edited = new Date().toISOString();
+            log(p, 'Edited a comment on', t.title);
           });
         },
         deleteComment: (taskId, commentId) =>
           withUndo('Deleted comment', (s) =>
             editProject(s, (p) => {
               const t = findTask(p, taskId);
-              if (t?.comments) t.comments = t.comments.filter((x) => x.id !== commentId);
+              if (!t?.comments) return;
+              t.comments = t.comments.filter((x) => x.id !== commentId);
+              log(p, 'Deleted a comment on', t.title);
             }),
           ),
 
         addEpic: (name) => {
           if (!name.trim()) return;
-          inProject((p) => void p.epics.push({ id: uid(), name: name.trim(), open: true, tasks: [] }));
+          inProject((p) => {
+            p.epics.push({ id: uid(), name: name.trim(), open: true, tasks: [] });
+            log(p, 'Added the epic', name.trim());
+          });
         },
         moveEpic: (epicId, index) =>
           inProject((p) => {
@@ -201,7 +241,9 @@ export const useStore = create<State>()(
           if (!name.trim()) return;
           inProject((p) => {
             const e = findEpic(p, epicId);
-            if (e) e.name = name.trim();
+            if (!e || e.name === name.trim()) return;
+            log(p, 'Renamed the epic', e.name, `to "${name.trim()}"`);
+            e.name = name.trim();
           });
         },
         deleteEpic: (epicId) => {
@@ -209,7 +251,10 @@ export const useStore = create<State>()(
           const e = p && findEpic(p, epicId);
           if (!e) return;
           withUndo(`Deleted "${e.name}"`, (s) => ({
-            ...editProject(s, (p) => (p.epics = p.epics.filter((x) => x.id !== epicId))),
+            ...editProject(s, (p) => {
+              p.epics = p.epics.filter((x) => x.id !== epicId);
+              log(p, 'Deleted the epic', e.name, e.tasks.length ? `and its ${plural(e.tasks.length, 'task')}` : undefined);
+            }),
             ...cleared,
           }));
         },
@@ -230,15 +275,26 @@ export const useStore = create<State>()(
               .filter(Boolean)
               .map((n) => ({ id: uid(), name: n, open: true, tasks: [] })),
           };
+          log(project, 'Created the project', project.name);
           mutate((d) => void d.projects.unshift(project), project.id);
           const first = project.epics[0]?.id ?? null;
           set({ screen: 'project', pid: project.id, filter: 'all', overlay: 'none', openTask: null, focus: first, adding: first, addingEpic: !first });
         },
-        renameProject: (id, name) => {
-          if (!name.trim()) return;
+        updateProject: (id, patch) => {
+          const name = patch.name?.trim();
+          const desc = patch.desc?.trim();
+          if (name === '') return;
           mutate((d) => {
             const p = d.projects.find((x) => x.id === id);
-            if (p) p.name = name.trim();
+            if (!p) return;
+            if (name !== undefined && name !== p.name) {
+              log(p, 'Renamed the project', p.name, `to "${name}"`);
+              p.name = name;
+            }
+            if (desc !== undefined && desc !== p.desc) {
+              log(p, 'Edited the description', '');
+              p.desc = desc;
+            }
           }, id);
         },
         deleteProject: (id) => {

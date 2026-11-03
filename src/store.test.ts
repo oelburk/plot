@@ -1,5 +1,5 @@
-import { beforeEach, expect, it } from 'vitest';
-import { DOING } from './lib/types';
+import { beforeEach, expect, it, vi } from 'vitest';
+import { DOING, TODO } from './lib/types';
 import { currentProject, useStore } from './store';
 
 const st = () => useStore.getState();
@@ -167,7 +167,7 @@ it('adds, edits and deletes comments, with undo for deletes', () => {
 });
 
 it('reset reseeds the data and goes home', () => {
-  st().renameProject(project().id, 'Changed');
+  st().updateProject(project().id, { name: 'Changed' });
   st().go('settings');
   st().reset();
   expect(st()).toMatchObject({ screen: 'home', pid: null, undo: null });
@@ -214,9 +214,9 @@ it('creating a project without epics opens add-epic', () => {
 
 it('ignores blank renames', () => {
   const p = project();
-  st().renameProject(p.id, '   ');
+  st().updateProject(p.id, { name: '   ' });
   expect(project().name).toBe(p.name);
-  st().renameProject(p.id, ' Atlas ');
+  st().updateProject(p.id, { name: ' Atlas ' });
   expect(project().name).toBe('Atlas');
 });
 
@@ -250,4 +250,65 @@ it('ignores a discipline tag already used by another, ignoring case', () => {
   expect(st().disciplines).toEqual(before);
   st().updateDiscipline('FE', { tag: 'fe', hue: 110 });
   expect(st().disciplines[0]).toMatchObject({ tag: 'fe', hue: 110 });
+});
+
+const history = () => (project().history ?? []).map(({ verb, name, to, s }) => ({ verb, name, to, s }));
+
+it('logs task changes to the project history, newest last', () => {
+  const [a, b] = project().epics;
+  const t = a.tasks[0];
+  st().addTask(a.id, ' Write docs ', 'FE');
+  st().setStatus(t.id, DOING);
+  st().setStatus(t.id, DOING);
+  st().updateTask(t.id, { title: 'Renamed' });
+  st().moveTask(t.id, b.id, 0);
+  st().addComment(t.id, 'Hi');
+  expect(history()).toEqual([
+    { verb: 'Added', name: 'Write docs', to: `to ${a.name}`, s: undefined },
+    { verb: 'Marked', name: t.title, to: 'as in progress', s: DOING },
+    { verb: 'Renamed', name: t.title, to: 'to "Renamed"', s: undefined },
+    { verb: 'Moved', name: 'Renamed', to: `to ${b.name}`, s: undefined },
+    { verb: 'Commented on', name: 'Renamed', to: undefined, s: undefined },
+  ]);
+});
+
+it('folds a repeat of the last history line within a minute into one', () => {
+  vi.useFakeTimers();
+  try {
+    const t = project().epics[0].tasks[0];
+    st().setStatus(t.id, DOING);
+    st().setStatus(t.id, TODO);
+    st().updateTask(t.id, { notes: 'a' });
+    st().updateTask(t.id, { notes: 'ab' });
+    expect(history().map((h) => h.to ?? h.verb)).toEqual(['as not started', 'Edited the notes on']);
+    vi.advanceTimersByTime(61_000);
+    st().updateTask(t.id, { notes: 'abc' });
+    expect(history()).toHaveLength(3);
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+it('undoing a delete also drops its history line', () => {
+  const epic = project().epics[1];
+  st().deleteEpic(epic.id);
+  expect(history().at(-1)).toMatchObject({ verb: 'Deleted the epic', name: epic.name });
+  st().undoDelete();
+  expect(history()).toEqual([]);
+});
+
+it('updates the project name and description, logging only real changes', () => {
+  const p = project();
+  st().updateProject(p.id, { name: p.name, desc: p.desc });
+  expect(history()).toEqual([]);
+  st().updateProject(p.id, { name: ' Atlas ', desc: ' New desc ' });
+  expect(project()).toMatchObject({ name: 'Atlas', desc: 'New desc' });
+  expect(history().map((h) => h.verb)).toEqual(['Renamed the project', 'Edited the description']);
+  st().updateProject(p.id, { name: '', desc: 'ignored' });
+  expect(project().desc).toBe('New desc');
+});
+
+it('starts a new project with a created line', () => {
+  st().createProject('Partner API', '', []);
+  expect(history()).toEqual([{ verb: 'Created the project', name: 'Partner API', to: undefined, s: undefined }]);
 });

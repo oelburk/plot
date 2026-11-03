@@ -1,3 +1,4 @@
+import { History, Pencil } from 'lucide-react';
 import { useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { InlineEdit } from '../components/InlineEdit';
@@ -8,6 +9,7 @@ import { focusUndo } from '../lib/focus';
 import { allTasks, stats } from '../lib/progress';
 import type { Project, Task } from '../lib/types';
 import { currentProject, useStore } from '../store';
+import { HistoryPanel } from './History';
 import { EpicPanel, MapView } from './MapView';
 import { Tree } from './Tree';
 
@@ -15,6 +17,7 @@ export function ProjectScreen() {
   const p = useStore(currentProject);
   const view = useStore((s) => s.view);
   const focus = useStore((s) => s.focus);
+  const showHistory = useStore((s) => s.showHistory);
   if (!p) return null;
   const tasks = allTasks(p);
   const focusIndex = p.epics.findIndex((e) => e.id === focus);
@@ -30,7 +33,7 @@ export function ProjectScreen() {
           {view === 'map' ? <MapView p={p} /> : <Tree p={p} />}
         </div>
       </div>
-      {view === 'map' && focusIndex >= 0 && <EpicPanel key={focus} epic={p.epics[focusIndex]} index={focusIndex} />}
+      {view === 'map' && focusIndex >= 0 ? <EpicPanel key={focus} epic={p.epics[focusIndex]} index={focusIndex} /> : showHistory && <HistoryPanel p={p} />}
     </div>
   );
 }
@@ -53,7 +56,9 @@ const MapIcon = () => (
 
 function TopBar({ p }: { p: Project }) {
   const view = useStore((s) => s.view);
+  const showHistory = useStore((s) => s.showHistory);
   const { go, patch } = useStore.getState();
+  const secondary = `${btn.secondary} flex items-center gap-6`;
   return (
     <div data-tauri-drag-region className="flex flex-wrap items-center justify-between gap-16">
       <div className="flex min-w-0 items-center gap-8 text-12.5 text-muted">
@@ -72,6 +77,20 @@ function TopBar({ p }: { p: Project }) {
             { value: 'map', label: <><MapIcon />Map</> },
           ]}
         />
+        <button
+          type="button"
+          data-history-toggle
+          aria-pressed={showHistory}
+          onClick={() => patch({ showHistory: !showHistory, focus: null })}
+          className={`${secondary} aria-pressed:border-white/22 aria-pressed:bg-white/10`}
+        >
+          <History size={13} strokeWidth={1.5} />
+          History
+        </button>
+        <button type="button" onClick={() => patch({ overlay: 'edit' })} className={secondary}>
+          <Pencil size={12} strokeWidth={1.5} />
+          Edit project
+        </button>
         <button type="button" onClick={() => patch({ addingEpic: true })} className={btn.primary}>
           + Epic
         </button>
@@ -82,7 +101,7 @@ function TopBar({ p }: { p: Project }) {
 
 function Title({ p }: { p: Project }) {
   const [renaming, setRenaming] = useState(false);
-  const { renameProject, deleteProject } = useStore.getState();
+  const { updateProject, deleteProject } = useStore.getState();
   const h1 = 'text-26 font-semibold leading-[1.15] tracking-[-0.025em]';
   return (
     <>
@@ -90,7 +109,7 @@ function Title({ p }: { p: Project }) {
         {renaming ? (
           <InlineEdit
             value={p.name}
-            onSave={(v) => renameProject(p.id, v)}
+            onSave={(v) => updateProject(p.id, { name: v })}
             onDone={() => setRenaming(false)}
             returnTo="[data-project-title] [aria-label^='More actions']"
             className={`-ml-9 w-full max-w-620 ${h1}`}

@@ -19,6 +19,8 @@ The guiding rule from the handoff still applies: **not another Jira**. If a feat
 | Repo | GitHub repo `oelburk/plot`, on the `main` branch. MIT licensed. |
 | In scope from "Not designed yet" | Renaming and deleting projects and epics, an undo toast after deletes, and confirmation for Reset and Import |
 | Added 2026-10-22 | Reordering epics and tasks (including moving tasks between epics), renaming tasks, and task comments |
+| Added 2026-11-03 | Project history feed, and an Edit project dialog (name, description, delete) |
+| Added 2026-11-03 | In-app updates from GitHub Releases (`tauri-plugin-updater`) |
 | Out of scope | Reassigning tasks when removing a discipline, the narrow-width sidebar drawer, component tests |
 
 ## Architecture
@@ -76,7 +78,7 @@ One Zustand store with three parts:
 
 - **Data** (saved): `projects`, `disciplines`.
 - **Prefs** (saved): `view: 'tree'|'map'`, `detail: 'bar'|'squares'|'grouped'`, `toggleStyle: 'labels'|'glyphs'`, `showDisc: boolean`, `hideDone: boolean`. The toolbar and Settings write the same values, so the last choice is the default.
-- **UI state** (in memory only): `screen`, `pid`, `filter`, `focus` (the epic in the map panel), `openTask`, `adding` (the epic id whose add-task input is open), `addingEpic`, `overlay: 'none'|'new'|'palette'`, `undo` (toast).
+- **UI state** (in memory only): `screen`, `pid`, `filter`, `focus` (the epic in the map panel), `openTask`, `adding` (the epic id whose add-task input is open), `addingEpic`, `overlay: 'none'|'new'|'palette'|'edit'`, `showHistory`, `undo` (toast).
 
 Text being typed (task and epic drafts, the selected draft discipline, the palette query and selection, the new-project form, the discipline draft) lives in component state.
 
@@ -107,6 +109,19 @@ Persistence: Zustand `persist` with the localStorage key `plot.v1`. It saves the
 - `Task.comments?: { id, text, at, edited? }[]`, oldest first; `at` and `edited` are ISO timestamps, shown relative with the full date and time on hover.
 - Enter posts, Shift+Enter adds a line. Edit opens the comment in place: Enter saves (marking it edited), Esc or clicking away cancels. Delete shows the undo toast.
 - The notes icon on a row shows when a task has notes or comments. Import accepts `comments` when present (each needs `text` and `at`); CSV export leaves them out.
+
+### History
+
+- `Project.history?: { id, at, verb, name, to?, s? }[]`, oldest first, rendered as `{verb} {name} {to}` (for example `Marked` **Login form** `as done`). `s` is set on status changes and picks the glyph.
+- Logged: adding, renaming, deleting and moving (to another epic) tasks; status, owner and notes changes; adding, editing and deleting comments; adding, renaming and deleting epics; creating the project, and changing its name or description. Changes that change nothing are not logged. Reordering within an epic, expand/collapse and discipline settings are not logged.
+- A repeat of the last line (same verb and name) within a minute replaces it, so typing notes or clicking through statuses leaves one line. History keeps the last 500 lines per project. Undoing a delete drops its line along with everything else since the delete.
+- The History button in the top bar toggles a 360px panel on the right, grouped by day (Today, Yesterday, then `Wed, Oct 28`), newest first, with the clock time on each line and the full date and time on hover. Opening an epic in the map view replaces it. Esc or × closes it and returns focus to the History button.
+- Projects created before this feature start with an empty history. JSON export includes it; import accepts it when present (each entry needs a non-empty `verb`, a `name` and an `at`); CSV leaves it out.
+
+### Edit project
+
+- An **Edit project** button sits left of **+ Epic** in the top bar, for discoverability; the ⋯ menu by the title and double-click rename still work.
+- It opens a dialog styled like New project with Name and Description. Enter in Name or Save applies both; a blank name can't be saved. **Delete project** deletes right away and shows the undo toast, like every other delete.
 
 ### ⋯ menu
 
@@ -162,6 +177,8 @@ Persistence: Zustand `persist` with the localStorage key `plot.v1`. It saves the
 - macOS title bar: `titleBarStyle: "Overlay"` with a hidden title. The sidebar runs to the top of the window, with the traffic-light buttons sitting over it.
   - The sidebar's top padding grows by 28px only when running in Tauri.
   - The sidebar top strip and the main area's top bar carry `data-tauri-drag-region`, so the window drags from there.
+- Updates: `tauri-plugin-updater` checks `https://github.com/oelburk/plot/releases/latest/download/latest.json` once per launch (not in `tauri dev` or the browser). When a newer version exists, an **Update available** card above Settings in the sidebar offers **Install and restart**, which downloads, verifies the minisign signature against the `pubkey` in `tauri.conf.json`, replaces the app and relaunches (`tauri-plugin-process`). A failed install says so on the card and offers Try again; a failed check only logs to the console. Settings → About shows the running version (`package.json`, which the release workflow keeps equal to `tauri.conf.json`) and, in the desktop app, a **Check for updates** button. Its row reports Checking…, "You're on the latest version.", or a failure; an update it finds shows in the same sidebar card.
+- The release workflow signs the `.app.tar.gz` update bundle with the `TAURI_SIGNING_PRIVATE_KEY` secret, and `tauri-action` uploads it with `latest.json`. Downloads made by the app don't get the quarantine flag, so updates don't need the `xattr` step.
 - The app icon is the logo mark: a rounded square with a light border, filled `#ececee` across the bottom 55%, on the `#0e0f12` app color. It's drawn as an SVG and turned into every icon size with `tauri icon`.
 
 ## Quality floor

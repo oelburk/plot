@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { Toast } from './components/Toast';
 import { focusSoon, isImeKey } from './lib/focus';
+import { EditProject } from './screens/EditProject';
 import { Home } from './screens/Home';
 import { NewProject } from './screens/NewProject';
 import { Palette } from './screens/Palette';
@@ -17,13 +18,14 @@ export default function App() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (isImeKey(e)) return;
-      const { overlay, focus, openTask, patch } = useStore.getState();
+      const { overlay, focus, openTask, showHistory, patch } = useStore.getState();
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         patch({ overlay: overlay === 'palette' ? 'none' : 'palette' });
       } else if (e.key === 'Escape' && !document.querySelector(':popover-open')) {
-        patch(overlay !== 'none' ? { overlay: 'none' } : { adding: null, addingEpic: false, openTask: null, focus: null });
+        patch(overlay !== 'none' ? { overlay: 'none' } : { adding: null, addingEpic: false, openTask: null, focus: null, showHistory: false });
         if (overlay === 'none' && (focus || openTask)) focusSoon(focus ? `[data-tile="${focus}"]` : `[data-task="${openTask}"]`);
+        else if (overlay === 'none' && showHistory) focusSoon('[data-history-toggle]');
       }
     };
     window.addEventListener('keydown', onKey);
@@ -38,6 +40,7 @@ export default function App() {
       </main>
       {overlay === 'palette' && <Palette />}
       {overlay === 'new' && <NewProject />}
+      {overlay === 'edit' && <EditProject />}
       <Toast />
     </div>
   );

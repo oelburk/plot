@@ -20,7 +20,7 @@ function Step({ n, label, state }: { n: number; label: string; state: 'active' |
   );
 }
 
-function Heading({ title, sub }: { title: string; sub: string }) {
+export function Heading({ title, sub }: { title: string; sub: string }) {
   return (
     <div className="flex flex-col gap-5">
       <span className="text-20 font-semibold tracking-[-0.02em]">{title}</span>
@@ -29,7 +29,7 @@ function Heading({ title, sub }: { title: string; sub: string }) {
   );
 }
 
-const field = `rounded-9 border border-white/10 bg-inset px-12 py-10 text-fg outline-none focus:border-white/18 ${fieldRing}`;
+export const field = `rounded-9 border border-white/10 bg-inset px-12 py-10 text-fg outline-none focus:border-white/18 ${fieldRing}`;
 
 export function NewProject() {
   const { patch, createProject } = useStore.getState();

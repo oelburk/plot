@@ -3,6 +3,7 @@ import { allTasks, stats } from '../lib/progress';
 import { currentProject, useStore } from '../store';
 import { InlineEdit } from './InlineEdit';
 import { Kbd, Ring } from './ui';
+import { UpdateNotice } from './UpdateNotice';
 
 const row = 'flex items-center gap-10 rounded-7 px-10 py-7 text-left text-13 hover:bg-white/4';
 
@@ -10,7 +11,7 @@ export function Sidebar() {
   const projects = useStore((s) => s.projects);
   const screen = useStore((s) => s.screen);
   const activeId = useStore((s) => currentProject(s)?.id);
-  const { go, patch, renameProject } = useStore.getState();
+  const { go, patch, updateProject } = useStore.getState();
   const [renaming, setRenaming] = useState<string | null>(null);
 
   return (
@@ -65,7 +66,7 @@ export function Sidebar() {
             <InlineEdit
               key={p.id}
               value={p.name}
-              onSave={(v) => renameProject(p.id, v)}
+              onSave={(v) => updateProject(p.id, { name: v })}
               onDone={() => setRenaming(null)}
               returnTo={`[data-project-row="${p.id}"]`}
               className="h-31 text-13"
@@ -87,6 +88,7 @@ export function Sidebar() {
         })}
       </nav>
 
+      <UpdateNotice />
       <div className="flex flex-col gap-2 border-t border-white/6 pt-8">
         <button type="button" onClick={() => go('settings')} className={`${row} text-strong ${screen === 'settings' ? 'bg-white/6' : ''}`}>
           <span className="flex w-14 shrink-0 justify-center">

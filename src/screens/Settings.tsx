@@ -1,6 +1,7 @@
 import { useRef, useState, type ChangeEvent, type KeyboardEvent, type ReactNode } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { btn, fieldRing, Segmented, Switch } from '../components/ui';
+import { canUpdate, checkForUpdate } from '../components/UpdateNotice';
 import { discColor, discTint, genTag, nextHue, SWATCH_HUES, usageCount } from '../lib/disciplines';
 import { saveTextFile } from '../lib/files';
 import { focusSoon, isImeKey } from '../lib/focus';
@@ -9,6 +10,7 @@ import { exportCsv, exportJson, parseImport } from '../lib/io';
 import { allTasks } from '../lib/progress';
 import type { Discipline, Project } from '../lib/types';
 import { useStore } from '../store';
+import { version } from '../../package.json';
 
 /** Esc dismisses an inline confirmation instead of reaching the app's own Esc handling. */
 const onEsc = (cancel: () => void) => (e: KeyboardEvent) => {
@@ -102,9 +104,42 @@ export function Settings() {
           <Disciplines />
         </Section>
 
+        <Section label="ABOUT">
+          <VersionRow />
+        </Section>
+
         <ResetCard />
       </div>
     </div>
+  );
+}
+
+function VersionRow() {
+  const update = useStore((s) => s.update);
+  const [state, setState] = useState<'idle' | 'checking' | 'latest' | 'failed'>('idle');
+  const run = async () => {
+    setState('checking');
+    try {
+      setState((await checkForUpdate()) ? 'idle' : 'latest');
+    } catch (e) {
+      console.error(e);
+      setState('failed');
+    }
+  };
+  const desc = update
+    ? `Plot ${update.version} is available. Install it from the sidebar.`
+    : { idle: 'Plot checks for updates each time it opens.', checking: 'Checking for updates…', latest: "You're on the latest version.", failed: "Couldn't check for updates. Check your connection and try again." }[state];
+  return (
+    <Row title="Version" desc={desc} error={!update && state === 'failed'}>
+      <span className="flex items-center gap-10">
+        <span className="rounded-6 bg-white/4 px-8 py-4 font-mono text-11.5 font-medium leading-[normal] text-secondary">v{version}</span>
+        {canUpdate() && !update && (
+          <button type="button" onClick={run} disabled={state === 'checking'} className={`${btn.secondary} disabled:opacity-60`}>
+            Check for updates
+          </button>
+        )}
+      </span>
+    </Row>
   );
 }
 

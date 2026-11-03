@@ -1,5 +1,5 @@
 import { lookup } from './disciplines';
-import { STATUS_LABELS, uid, type Data, type Discipline, type Epic, type Project, type Status, type Task } from './types';
+import { STATUS_LABELS, uid, type Activity, type Data, type Discipline, type Epic, type Project, type Status, type Task } from './types';
 
 export function exportJson(data: Data, now = new Date()): string {
   return JSON.stringify(
@@ -71,6 +71,15 @@ export function parseImport(text: string): ImportResult {
       }
       epics.push({ id: eid, name: e.name, open: e.open === true, tasks });
     }
+    let history: Activity[] | undefined;
+    if (p.history !== undefined) {
+      if (!Array.isArray(p.history)) return fail(`${at} has a history that isn't a list.`);
+      history = [];
+      for (const [hi, h] of p.history.entries()) {
+        if (!isObj(h) || !isName(h.verb) || !isStr(h.name) || !isStr(h.at)) return fail(`${at}, history entry ${hi + 1} needs a verb, a name and a time.`);
+        history.push({ id: isStr(h.id) ? h.id : uid(), at: h.at, verb: h.verb, name: h.name, ...(isStr(h.to) ? { to: h.to } : {}), ...(isStatus(h.s) ? { s: h.s } : {}) });
+      }
+    }
     projects.push({
       id: pid,
       name: p.name,
@@ -78,6 +87,7 @@ export function parseImport(text: string): ImportResult {
       edited: isStr(p.edited) ? p.edited : undefined,
       updatedAt: isStr(p.updatedAt) ? p.updatedAt : undefined,
       epics,
+      ...(history ? { history } : {}),
     });
   }
 

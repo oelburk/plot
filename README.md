@@ -31,6 +31,8 @@ There are no accounts, assignees, due dates, sprints or workflows. Your data is 
 - **⌘K for everything.** Jump between projects, switch views, export, or add a task without leaving the keyboard.
 - **Drag to re-arrange** epics and tasks, including moving a task into another epic.
 - **Notes and comments.** Notes describe a task; timestamped comments track how it's going.
+- **History.** A feed of every change to a project and when it happened, grouped by day.
+- **Edit project.** Rename a project, change its description or delete it from the top bar.
 - **Undo** after any delete.
 - **Portable data.** Export to JSON or CSV, and import a JSON export to restore or move machines.
 
@@ -47,6 +49,10 @@ There are no accounts, assignees, due dates, sprints or workflows. Your data is 
 **Comments.** Follow a task's progress without rewriting its notes.
 
 ![An expanded task with notes and three timestamped comments](docs/screenshots/comments.webp)
+
+**History.** See what changed in a project and when, newest first.
+
+![The History panel next to the tree, listing status changes, renames and additions grouped by day](docs/screenshots/history.webp)
 
 **All projects.** Each card shows its epics as bars, so you can see what's moving.
 
@@ -71,6 +77,8 @@ Plot isn't notarized by Apple, so macOS refuses to open it the first time ("can'
 ```bash
 xattr -dr com.apple.quarantine /Applications/Plot.app
 ```
+
+From v0.3.0 on, Plot checks for a new release each time it opens and shows **Update available** in the sidebar. Click **Install and restart** to update in place; your data stays where it is.
 
 ## Develop
 
@@ -104,7 +112,9 @@ Bump `version` in `package.json`, `src-tauri/tauri.conf.json` and `src-tauri/Car
 git tag v0.1.0 && git push origin v0.1.0
 ```
 
-The Release workflow builds a universal `.dmg` and publishes it on the GitHub Releases page.
+The Release workflow builds a universal `.dmg` and publishes it on the GitHub Releases page, together with a signed update bundle and the `latest.json` that installed apps check.
+
+Update bundles are signed with the key in `~/.tauri/plot.key` (its password is in `~/.tauri/plot.key.password`), stored in the repo secrets `TAURI_SIGNING_PRIVATE_KEY` and `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`. Keep a backup of the key: installed apps only accept updates signed with it, so if it's lost, everyone has to reinstall from a `.dmg` once.
 
 ### Docs
 

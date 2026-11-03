@@ -84,7 +84,7 @@ function EpicBlock({ epics, epic, index }: { epics: Epic[]; epic: Epic; index: n
             </span>
           </button>
         )}
-        <span className="text-12 text-faint">{plural(st.total, 'task')}</span>
+        <span className="whitespace-nowrap text-12 text-faint">{plural(st.total, 'task')}</span>
         <span className="flex-1" />
         <Menu
           label={`More actions for ${epic.name}`}
@@ -122,7 +122,7 @@ function EpicBlock({ epics, epic, index }: { epics: Epic[]; epic: Epic; index: n
           </div>
         ) : (
           <>
-            {st.doing > 0 && <span className="text-11.5 text-doing">{st.doing} in progress</span>}
+            {st.doing > 0 && <span className="whitespace-nowrap text-11.5 text-doing">{st.doing} in progress</span>}
             <StackedBar s={st} soft className="h-5 w-140 shrink-0" />
           </>
         )}

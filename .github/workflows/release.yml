@@ -41,6 +41,8 @@ jobs:
       - uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: ${{ github.ref_name }}
           releaseName: Plot ${{ github.ref_name }}
@@ -49,6 +51,8 @@ jobs:
           args: --target universal-apple-darwin --bundles app,dmg
           releaseBody: |
             Universal macOS build (Apple Silicon and Intel).
+
+            **Already have Plot v0.3.0 or later?** It offers this update itself the next time you open it.
 
             **Install:** download `Plot_*_universal.dmg`, open it and drag `Plot.app` into Applications.
 
