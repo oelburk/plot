@@ -4,12 +4,12 @@ import { InlineEdit } from '../components/InlineEdit';
 import { Menu } from '../components/Menu';
 import { dragSource, DropLine, epicDrop, moveItems, taskDrop, useDragging, useDropPos, vertical } from '../components/reorder';
 import { AddEpicInput, AddTaskInput, NotesPanel, TaskMenu } from '../components/tasks';
-import { DisciplineTag, hasNotes, NotesIcon, squareBg, StackedBar, StatusToggle } from '../components/ui';
+import { DisciplineTag, hasNotes, isOutlined, NotesIcon, squareBg, StackedBar, StatusToggle, titleTone } from '../components/ui';
 import { discColor, groupByDiscipline, lookup } from '../lib/disciplines';
 import { focusSoon, focusUndo } from '../lib/focus';
 import { pad, plural } from '../lib/format';
 import { isComplete, isVisible, stats } from '../lib/progress';
-import { DONE, STATUS_LABELS, TODO, type Discipline, type Epic, type Project, type Task } from '../lib/types';
+import { STATUS_LABELS, type Discipline, type Epic, type Project, type Task } from '../lib/types';
 import { useStore } from '../store';
 
 export function Tree({ p }: { p: Project }) {
@@ -157,14 +157,14 @@ function TreeSquare({ epic, task, small = false }: { epic: Epic; task: Task; sma
         // Reveal the clicked task: turn off Hide done or clear the discipline filter if either one hides it.
         patch({
           openTask: task.id,
-          ...(task.s === DONE ? { hideDone: false } : {}),
+          ...(isVisible(task, 'all', true) ? {} : { hideDone: false }),
           ...(filter !== 'all' && task.d !== filter ? { filter: 'all' } : {}),
         });
       }}
       className={small ? 'size-8 rounded-2' : 'size-10 rounded-3'}
       style={{
         background: squareBg(task.s),
-        boxShadow: selected ? '0 0 0 1.5px var(--color-fg)' : task.s === TODO ? 'inset 0 0 0 1px rgba(255,255,255,0.18)' : 'none',
+        boxShadow: selected ? '0 0 0 1.5px var(--color-fg)' : isOutlined(task.s) ? 'inset 0 0 0 1px rgba(255,255,255,0.18)' : 'none',
         opacity: small || filter === 'all' || task.d === filter ? 1 : 0.2,
       }}
     />
@@ -238,7 +238,7 @@ function TaskRow({ epic, task, visible, grouped = false }: { epic: Epic; task: T
             aria-expanded={isOpen}
             onClick={(e) => e.detail < 2 && patch({ openTask: isOpen ? null : task.id })}
             onDoubleClick={rename}
-            className={`flex min-w-0 flex-1 items-center gap-9 text-left text-13 ${task.s === DONE ? 'text-muted' : 'text-task'}`}
+            className={`flex min-w-0 flex-1 items-center gap-9 text-left text-13 ${titleTone(task.s)}`}
           >
             <span className="truncate">{task.title}</span>
             {hasNotes(task) && <NotesIcon />}

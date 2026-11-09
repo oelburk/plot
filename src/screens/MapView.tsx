@@ -3,12 +3,12 @@ import { useShallow } from 'zustand/react/shallow';
 import { InlineEdit } from '../components/InlineEdit';
 import { dragSource, DropLine, epicDrop, horizontal, taskDrop, useDragging, useDropPos } from '../components/reorder';
 import { AddEpicInput, AddTaskInput, NotesPanel, TaskMenu } from '../components/tasks';
-import { DisciplineTag, hasNotes, NotesIcon, Pct, squareBg, StackedBar, StatusToggle } from '../components/ui';
+import { DisciplineTag, hasNotes, isOutlined, NotesIcon, Pct, squareBg, StackedBar, StatusToggle, titleTone } from '../components/ui';
 import { discColor, groupByDiscipline, lookup } from '../lib/disciplines';
 import { focusSoon } from '../lib/focus';
 import { pad, plural } from '../lib/format';
 import { isComplete, isVisible, stats } from '../lib/progress';
-import { DONE, STATUS_LABELS, TODO, type Epic, type Project, type Task } from '../lib/types';
+import { STATUS_LABELS, type Epic, type Project, type Task } from '../lib/types';
 import { useStore } from '../store';
 
 export function MapView({ p }: { p: Project }) {
@@ -70,7 +70,7 @@ function Tile({ epics, epic, index }: { epics: Epic[]; epic: Epic; index: number
             </div>
           </div>
         ))}
-        {!st.total && <span className="text-12 text-faint">No tasks yet. Open to add some.</span>}
+        {!epic.tasks.length && <span className="text-12 text-faint">No tasks yet. Open to add some.</span>}
       </div>
       <div className="flex justify-between gap-10 border-t border-white/5 pt-10 text-11.5 text-muted">
         <span>{st.total ? `${st.done} done · ${st.doing} in progress` : 'Empty'}</span>
@@ -99,14 +99,14 @@ function MapSquare({ epicId, task }: { epicId: string; task: Task }) {
           openTask: task.id,
           adding: null,
           showHistory: false,
-          ...(task.s === DONE ? { hideDone: false } : {}),
+          ...(isVisible(task, 'all', true) ? {} : { hideDone: false }),
           ...(filter !== 'all' && task.d !== filter ? { filter: 'all' } : {}),
         });
       }}
       className="size-16 rounded-4 transition-[background-color] duration-150 hover:scale-115"
       style={{
         background: squareBg(task.s),
-        boxShadow: selected ? '0 0 0 2px var(--color-app), 0 0 0 3.5px var(--color-fg)' : task.s === TODO ? 'inset 0 0 0 1px rgba(255,255,255,0.14)' : 'none',
+        boxShadow: selected ? '0 0 0 2px var(--color-app), 0 0 0 3.5px var(--color-fg)' : isOutlined(task.s) ? 'inset 0 0 0 1px rgba(255,255,255,0.14)' : 'none',
         opacity: dim ? 0.18 : 1,
       }}
     />
@@ -228,7 +228,7 @@ function PanelTask({ epic, task, visible }: { epic: Epic; task: Task; visible: s
             aria-expanded={isOpen}
             onClick={(e) => e.detail < 2 && patch({ openTask: isOpen ? null : task.id })}
             onDoubleClick={rename}
-            className={`min-w-0 flex-1 text-pretty text-left text-13 leading-[1.4] ${task.s === DONE ? 'text-muted' : 'text-task'}`}
+            className={`min-w-0 flex-1 text-pretty text-left text-13 leading-[1.4] ${titleTone(task.s)}`}
           >
             {task.title}
           </button>

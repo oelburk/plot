@@ -1,8 +1,10 @@
 export const TODO = 0;
 export const DOING = 1;
 export const DONE = 2;
-export type Status = typeof TODO | typeof DOING | typeof DONE;
-export const STATUS_LABELS = ['Not started', 'In progress', 'Done'] as const;
+/** Won't be built: kept for its notes and comments, but left out of progress. */
+export const CLOSED = 3;
+export type Status = typeof TODO | typeof DOING | typeof DONE | typeof CLOSED;
+export const STATUS_LABELS = ['Not started', 'In progress', 'Done', 'Closed'] as const;
 
 export interface Discipline {
   code: string;

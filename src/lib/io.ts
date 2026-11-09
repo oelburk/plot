@@ -24,7 +24,7 @@ export type ImportResult = { ok: true; projects: Project[]; disciplines?: Discip
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 const isStr = (v: unknown): v is string => typeof v === 'string';
 const isName = (v: unknown): v is string => isStr(v) && v.trim() !== '';
-const isStatus = (v: unknown): v is Status => v === 0 || v === 1 || v === 2;
+const isStatus = (v: unknown): v is Status => v === 0 || v === 1 || v === 2 || v === 3;
 const fail = (error: string): ImportResult => ({ ok: false, error });
 
 export function parseImport(text: string): ImportResult {
@@ -55,7 +55,7 @@ export function parseImport(text: string): ImportResult {
       const tasks: Task[] = [];
       for (const [ti, t] of e.tasks.entries()) {
         if (!isObj(t) || !isName(t.title) || !isStatus(t.s))
-          return fail(`${eat}, task ${ti + 1} needs a title and a status of 0, 1 or 2.`);
+          return fail(`${eat}, task ${ti + 1} needs a title and a status of 0, 1, 2 or 3.`);
         const tid = isStr(t.id) ? t.id : uid();
         if (repeats(tids, tid)) return fail(`${eat}, task ${ti + 1} repeats the id "${tid}".`);
         const task: Task = { id: tid, title: t.title, d: isStr(t.d) ? t.d : 'OT', s: t.s, notes: isStr(t.notes) ? t.notes : '' };

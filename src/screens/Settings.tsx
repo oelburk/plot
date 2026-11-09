@@ -81,7 +81,7 @@ export function Settings() {
           <Row title="Project view" desc="Which view a project opens in.">
             <Segmented wide value={s.view} onChange={(v) => patch({ view: v })} options={[{ value: 'tree', label: 'Tree' }, { value: 'map', label: 'Map' }]} />
           </Row>
-          <Row title="Status toggle" desc="Show labels, or just the ○ ◐ ● glyphs.">
+          <Row title="Status toggle" desc="Show labels, or just the ○ ◐ ● ⊘ glyphs.">
             <Segmented wide value={s.toggleStyle} onChange={(v) => patch({ toggleStyle: v })} options={[{ value: 'labels', label: 'Labels' }, { value: 'glyphs', label: 'Glyphs' }]} />
           </Row>
           <Row title="Epic rows in the tree" desc="Progress bar, task squares by discipline, or a discipline level.">
@@ -95,7 +95,7 @@ export function Settings() {
           <Row title="Discipline breakdown" desc="Per-discipline % in the project header.">
             <Switch big label="Discipline breakdown" on={s.showDisc} onChange={(v) => patch({ showDisc: v })} />
           </Row>
-          <Row title="Hide done tasks" desc="Keep finished work out of the tree.">
+          <Row title="Hide done tasks" desc="Keep finished and closed work out of the tree.">
             <Switch big label="Hide done tasks" on={s.hideDone} onChange={(v) => patch({ hideDone: v })} />
           </Row>
         </Section>

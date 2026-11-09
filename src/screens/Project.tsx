@@ -1,13 +1,13 @@
 import { History, Pencil } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { InlineEdit } from '../components/InlineEdit';
 import { Menu } from '../components/Menu';
-import { btn, DisciplineTag, Pct, Segmented, StackedBar, Switch } from '../components/ui';
+import { btn, DisciplineTag, Pct, Segmented, squareBg, StackedBar, Switch } from '../components/ui';
 import { discColor } from '../lib/disciplines';
 import { focusUndo } from '../lib/focus';
 import { allTasks, stats } from '../lib/progress';
-import type { Project, Task } from '../lib/types';
+import { CLOSED, type Project, type Task } from '../lib/types';
 import { currentProject, useStore } from '../store';
 import { HistoryPanel } from './History';
 import { EpicPanel, MapView } from './MapView';
@@ -140,10 +140,12 @@ function Title({ p }: { p: Project }) {
   );
 }
 
-function Legend({ swatch, label, n }: { swatch: string; label: string; n: number }) {
+const CLOSED_SWATCH = { background: squareBg(CLOSED) };
+
+function Legend({ swatch, style, label, n }: { swatch: string; style?: CSSProperties; label: string; n: number }) {
   return (
     <span className="flex items-center gap-7">
-      <span className={`size-8 rounded-2 ${swatch}`} />
+      <span className={`size-8 rounded-2 ${swatch}`} style={style} />
       {label}
       <span className="font-mono text-12 font-medium text-strong">{n}</span>
     </span>
@@ -170,6 +172,7 @@ function ProgressCard({ p, tasks }: { p: Project; tasks: Task[] }) {
           <Legend swatch="bg-done" label="Done" n={st.done} />
           <Legend swatch="bg-doing" label="In progress" n={st.doing} />
           <Legend swatch="shadow-[inset_0_0_0_1px_rgba(255,255,255,0.25)]" label="Not started" n={st.todo} />
+          {st.closed > 0 && <Legend swatch="shadow-[inset_0_0_0_1px_rgba(255,255,255,0.25)]" style={CLOSED_SWATCH} label="Closed" n={st.closed} />}
         </div>
       </div>
       <StackedBar s={st} className="h-8" />
@@ -230,6 +233,9 @@ function Toolbar({ tasks }: { tasks: Task[] }) {
             <span className="flex items-center gap-6"><span className="size-10 rounded-3 bg-done" />Done</span>
             <span className="flex items-center gap-6"><span className="size-10 rounded-3 bg-doing" />In progress</span>
             <span className="flex items-center gap-6"><span className="size-10 rounded-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.14)]" />Not started</span>
+            {tasks.some((t) => t.s === CLOSED) && (
+              <span className="flex items-center gap-6"><span className="size-10 rounded-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.14)]" style={CLOSED_SWATCH} />Closed</span>
+            )}
           </div>
         ) : (
           <Segmented

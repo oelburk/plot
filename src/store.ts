@@ -74,7 +74,7 @@ const findTask = (p: Project, id: string) => p.epics.flatMap((e) => e.tasks).fin
 const findEpic = (p: Project, id: string) => p.epics.find((e) => e.id === id);
 const cleared = { focus: null, openTask: null, adding: null, addingEpic: false };
 
-const STATUS_TO = ['as not started', 'as in progress', 'as done'];
+const STATUS_TO = ['as not started', 'as in progress', 'as done', 'as closed'];
 // ponytail: a repeat of the last line (same verb and name) within a minute replaces it, so typing notes or clicking
 // through statuses logs once; capped at 500 lines per project, oldest dropped first
 const log = (p: Project, verb: string, name: string, to?: string, s?: Status) => {

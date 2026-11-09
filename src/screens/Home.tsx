@@ -1,14 +1,13 @@
 import { Pct } from '../components/ui';
 import { editedLabel, plural } from '../lib/format';
 import { allTasks, isComplete, stats } from '../lib/progress';
-import { DONE, type Project } from '../lib/types';
+import type { Project } from '../lib/types';
 import { useStore } from '../store';
 
 export function Home() {
   const projects = useStore((s) => s.projects);
   const { go, patch } = useStore.getState();
-  const tasks = projects.flatMap(allTasks);
-  const done = tasks.filter((t) => t.s === DONE).length;
+  const { total, done } = stats(projects.flatMap(allTasks));
   const openNew = () => patch({ overlay: 'new' });
 
   return (
@@ -18,7 +17,7 @@ export function Home() {
           <div className="flex flex-col gap-6">
             <h1 tabIndex={-1} className="text-26 font-semibold leading-[1.15] tracking-[-0.025em] outline-none">Projects</h1>
             <span className="text-13 text-muted">
-              {plural(projects.length, 'project')} · {plural(tasks.length, 'task')} · {done} done
+              {plural(projects.length, 'project')} · {plural(total, 'task')} · {done} done
             </span>
           </div>
           <button type="button" onClick={openNew} className="rounded-8 bg-fg px-14 py-8 text-13 font-medium text-app hover:bg-white">

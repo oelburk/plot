@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { allTasks, isComplete, isVisible, stats, width } from './progress';
-import { DOING, DONE, TODO, type Status, type Task } from './types';
+import { CLOSED, DOING, DONE, TODO, type Status, type Task } from './types';
 
 const t = (s: Status, d = 'FE'): Task => ({ id: Math.random().toString(), title: 'x', d, s, notes: '' });
 
 describe('stats', () => {
   it('is 0% with no tasks', () => {
-    expect(stats([])).toEqual({ total: 0, done: 0, doing: 0, todo: 0, pct: 0 });
+    expect(stats([])).toEqual({ total: 0, done: 0, doing: 0, todo: 0, closed: 0, pct: 0 });
   });
   it('counts in progress as 0', () => {
     expect(stats([t(DONE), t(DOING)]).pct).toBe(50);
@@ -20,7 +20,12 @@ describe('stats', () => {
     expect(stats([t(DONE), t(DONE)]).pct).toBe(100);
   });
   it('counts each status', () => {
-    expect(stats([t(DONE), t(DOING), t(TODO), t(TODO)])).toMatchObject({ total: 4, done: 1, doing: 1, todo: 2 });
+    expect(stats([t(DONE), t(DOING), t(TODO), t(TODO), t(CLOSED)])).toMatchObject({ total: 4, done: 1, doing: 1, todo: 2, closed: 1 });
+  });
+  it('leaves closed tasks out of progress', () => {
+    expect(stats([t(DONE), t(TODO), t(CLOSED)]).pct).toBe(50);
+    expect(isComplete(stats([t(DONE), t(CLOSED)]))).toBe(true);
+    expect(stats([t(CLOSED)])).toMatchObject({ total: 0, pct: 0 });
   });
 });
 
@@ -48,4 +53,5 @@ it('filters by discipline and hide done', () => {
   expect(isVisible(t(TODO, 'FE'), 'BE', false)).toBe(false);
   expect(isVisible(t(TODO, 'BE'), 'BE', true)).toBe(true);
   expect(isVisible(t(DOING), 'all', true)).toBe(true);
+  expect(isVisible(t(CLOSED), 'all', true)).toBe(false);
 });

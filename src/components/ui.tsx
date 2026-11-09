@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { discColor, discTint } from '../lib/disciplines';
 import { width, type Stats } from '../lib/progress';
-import { DOING, DONE, STATUS_LABELS, TODO, type Discipline, type Status, type Task } from '../lib/types';
+import { CLOSED, DOING, DONE, STATUS_LABELS, TODO, type Discipline, type Status, type Task } from '../lib/types';
 import { useStore } from '../store';
 
 export const btn = {
@@ -14,8 +14,15 @@ export const btn = {
 /** Focus ring for text fields; index.css removes their outline. */
 export const fieldRing = 'focus:shadow-[0_0_0_2px_oklch(0.78_0.1_250/0.6)]';
 
+const slash = (color: string, w: number) => `linear-gradient(135deg, transparent calc(50% - ${w}px), ${color} 0 calc(50% + ${w}px), transparent 0)`;
+
 export const squareBg = (s: Status) =>
-  s === DONE ? 'var(--color-done)' : s === DOING ? 'var(--color-doing)' : 'rgba(255,255,255,0.03)';
+  s === DONE ? 'var(--color-done)' : s === DOING ? 'var(--color-doing)' : s === CLOSED ? slash('rgba(255,255,255,0.3)', 0.5) : 'rgba(255,255,255,0.03)';
+
+/** Not started and closed squares are outlined, closed ones also struck through by `squareBg`. */
+export const isOutlined = (s: Status) => s === TODO || s === CLOSED;
+
+export const titleTone = (s: Status) => (s === CLOSED ? 'text-faint line-through' : s === DONE ? 'text-muted' : 'text-task');
 
 export function DisciplineTag({ d, w = 32, className = '' }: { d: Discipline; w?: number; className?: string }) {
   return (
@@ -80,17 +87,23 @@ export function Glyph({ s }: { s: Status }) {
   return (
     <span
       className="size-10 shrink-0 rounded-full border-[1.5px] border-current"
-      style={s === DOING ? { padding: 1.5, background: 'conic-gradient(currentColor 0 50%, transparent 50% 100%) content-box' } : undefined}
+      style={
+        s === DOING
+          ? { padding: 1.5, background: 'conic-gradient(currentColor 0 50%, transparent 50% 100%) content-box' }
+          : s === CLOSED
+            ? { background: slash('currentColor', 0.75) }
+            : undefined
+      }
     />
   );
 }
 
-const ACTIVE = ['bg-white/9 text-fg', 'bg-doing/16 text-doing-fg', 'bg-done/16 text-done-fg'];
+const ACTIVE = ['bg-white/9 text-fg', 'bg-doing/16 text-doing-fg', 'bg-done/16 text-done-fg', 'bg-white/9 text-secondary'];
 
 export function StatusToggle({ value, onChange, labels, inPanel = false }: { value: Status; onChange: (s: Status) => void; labels: boolean; inPanel?: boolean }) {
   return (
     <div role="group" aria-label="Status" className={`flex shrink-0 gap-1 rounded-8 border border-white/7 p-2 ${inPanel ? 'bg-search' : 'bg-inset'}`}>
-      {([TODO, DOING, DONE] as const).map((s) => (
+      {([TODO, DOING, DONE, CLOSED] as const).map((s) => (
         <button
           key={s}
           type="button"
