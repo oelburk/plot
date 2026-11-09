@@ -9,7 +9,7 @@ import {
 import sample from './sample-data.json';
 
 export type Screen = 'home' | 'project' | 'settings';
-export type Overlay = 'none' | 'new' | 'palette' | 'edit';
+export type Overlay = 'none' | 'new' | 'palette' | 'edit' | 'transfer';
 export type Drag = { kind: 'epic' | 'task'; id: string };
 export type DropPos = 'before' | 'after' | 'in';
 
@@ -29,6 +29,8 @@ interface Ui {
   adding: string | null;
   addingEpic: boolean;
   overlay: Overlay;
+  /** The task the 'transfer' overlay moves or copies. */
+  transfer: string | null;
   showHistory: boolean;
   update: Update | null;
   undo: { label: string; snapshot: Data; at: number; back?: string } | null;
@@ -43,6 +45,7 @@ interface Actions {
   updateTask: (taskId: string, patch: Partial<Pick<Task, 'title' | 'd' | 'notes'>>) => void;
   deleteTask: (taskId: string) => void;
   moveTask: (taskId: string, epicId: string, index: number) => void;
+  transferTask: (taskId: string, projectId: string, epicId: string, copy: boolean) => void;
   addComment: (taskId: string, text: string) => void;
   editComment: (taskId: string, commentId: string, text: string) => void;
   deleteComment: (taskId: string, commentId: string) => void;
@@ -74,7 +77,7 @@ const findTask = (p: Project, id: string) => p.epics.flatMap((e) => e.tasks).fin
 const findEpic = (p: Project, id: string) => p.epics.find((e) => e.id === id);
 const cleared = { focus: null, openTask: null, adding: null, addingEpic: false };
 
-const STATUS_TO = ['as not started', 'as in progress', 'as done'];
+const STATUS_TO = ['as not started', 'as in progress', 'as done', 'as closed'];
 // ponytail: a repeat of the last line (same verb and name) within a minute replaces it, so typing notes or clicking
 // through statuses logs once; capped at 500 lines per project, oldest dropped first
 const log = (p: Project, verb: string, name: string, to?: string, s?: Status) => {
@@ -131,6 +134,7 @@ export const useStore = create<State>()(
         filter: 'all',
         ...cleared,
         overlay: 'none',
+        transfer: null,
         showHistory: false,
         update: null,
         undo: null,
@@ -195,6 +199,36 @@ export const useStore = create<State>()(
             to.open = true;
             if (from !== to) log(p, 'Moved', t.title, `to ${to.name}`);
           }),
+        transferTask: (taskId, projectId, epicId, copy) => {
+          const src = currentProject(get());
+          const t = src && findTask(src, taskId);
+          const dst = get().projects.find((x) => x.id === projectId);
+          const epic = dst && findEpic(dst, epicId);
+          if (!src || !t || !dst || !epic || src.id === dst.id) return;
+          withUndo(`${copy ? 'Copied' : 'Moved'} "${t.title}" to ${dst.name}`, (s) => ({
+            ...edit(
+              s,
+              (d) => {
+                const from = d.projects.find((x) => x.id === src.id)!;
+                const to = d.projects.find((x) => x.id === dst.id)!;
+                const e = findEpic(to, epicId)!;
+                const task = findTask(from, taskId)!;
+                // a copy needs its own comments array: a shared one would stay shared through later clones
+                if (copy) e.tasks.push({ ...structuredClone(task), id: uid() });
+                else {
+                  from.epics.forEach((x) => (x.tasks = x.tasks.filter((y) => y.id !== taskId)));
+                  e.tasks.push(task);
+                  from.updatedAt = new Date().toISOString();
+                }
+                e.open = true;
+                log(from, copy ? 'Copied' : 'Moved', t.title, `to ${dst.name}`);
+                log(to, 'Added', t.title, `to ${e.name} from ${src.name}`);
+              },
+              dst.id,
+            ),
+            ...(copy ? {} : { openTask: null }),
+          }));
+        },
         addComment: (taskId, text) => {
           if (!text.trim()) return;
           inProject((p) => {

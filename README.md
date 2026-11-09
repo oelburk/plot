@@ -24,12 +24,12 @@ There are no accounts, assignees, due dates, sprints or workflows. Your data is 
 
 ## Features
 
-- **One-click status.** Every task has an inline Not started / In progress / Done toggle.
-- **Honest progress.** Percentages for the project, each epic and each discipline. Anything unfinished caps at 99%, so 100% always means done.
+- **One-click status.** Every task has an inline Not started / In progress / Done / Closed toggle.
+- **Honest progress.** Percentages for the project, each epic and each discipline. Anything unfinished caps at 99%, so 100% always means done. Closed tasks, the ones you've decided not to build, keep their notes and comments but don't count.
 - **Tree and Map views.** Work through tasks in the tree, or see every epic at a glance on the map and open one in a side panel.
 - **Your disciplines.** Frontend, Backend, UI/UX and Other out of the box. Rename them, recolour them, or add your own.
 - **⌘K for everything.** Jump between projects, switch views, export, or add a task without leaving the keyboard.
-- **Drag to re-arrange** epics and tasks, including moving a task into another epic.
+- **Drag to re-arrange** epics and tasks, including moving a task into another epic. Move or copy a task to another project from its ⋯ menu.
 - **Notes and comments.** Notes describe a task; timestamped comments track how it's going.
 - **History.** A feed of every change to a project and when it happened, grouped by day.
 - **Edit project.** Rename a project, change its description or delete it from the top bar.

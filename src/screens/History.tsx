@@ -4,7 +4,7 @@ import { clockTime, dayLabel, fullTime, plural } from '../lib/format';
 import type { Activity, Project } from '../lib/types';
 import { useStore } from '../store';
 
-const GLYPH_COLOR = ['text-muted', 'text-doing', 'text-done'];
+const GLYPH_COLOR = ['text-muted', 'text-doing', 'text-done', 'text-faint'];
 
 export function HistoryPanel({ p }: { p: Project }) {
   const { patch } = useStore.getState();

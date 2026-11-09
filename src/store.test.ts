@@ -1,5 +1,5 @@
 import { beforeEach, expect, it, vi } from 'vitest';
-import { DOING, TODO } from './lib/types';
+import { CLOSED, DOING, TODO } from './lib/types';
 import { currentProject, useStore } from './store';
 
 const st = () => useStore.getState();
@@ -143,6 +143,47 @@ it('moves a task within its epic and into another epic, opening it', () => {
   expect(project().epics[0].tasks.some((t) => t.id === ids[0])).toBe(false);
   expect(project().epics[1].tasks[0].id).toBe(ids[0]);
   expect(project().epics[1].open).toBe(true);
+});
+
+it('closing a task keeps it and logs it as closed', () => {
+  const t = project().epics[0].tasks[0];
+  st().addComment(t.id, 'Dropped from scope');
+  st().setStatus(t.id, CLOSED);
+  expect(project().epics[0].tasks[0]).toMatchObject({ id: t.id, s: CLOSED, comments: [{ text: 'Dropped from scope' }] });
+  expect(history().at(-1)).toMatchObject({ verb: 'Marked', to: 'as closed', s: CLOSED });
+});
+
+it('moves a task to another project, logging in both, with undo', () => {
+  const src = project();
+  const dst = st().projects[1];
+  const t = src.epics[0].tasks[0];
+  st().patch({ openTask: t.id });
+  st().addComment(t.id, 'Keep me');
+  st().transferTask(t.id, dst.id, dst.epics[0].id, false);
+  const to = st().projects.find((p) => p.id === dst.id)!;
+  expect(project().epics[0].tasks.some((x) => x.id === t.id)).toBe(false);
+  expect(to.epics[0].tasks.at(-1)).toMatchObject({ id: t.id, s: t.s, comments: [{ text: 'Keep me' }] });
+  expect(to.epics[0].open).toBe(true);
+  expect(history().at(-1)).toMatchObject({ verb: 'Moved', name: t.title, to: `to ${dst.name}` });
+  expect(to.history?.at(-1)).toMatchObject({ verb: 'Added', name: t.title, to: `to ${dst.epics[0].name} from ${src.name}` });
+  expect(st()).toMatchObject({ openTask: null, undo: { label: `Moved "${t.title}" to ${dst.name}` } });
+  st().undoDelete();
+  expect(project().epics[0].tasks[0].id).toBe(t.id);
+  expect(st().projects.find((p) => p.id === dst.id)!.epics[0].tasks.some((x) => x.id === t.id)).toBe(false);
+});
+
+it('copies a task to another project with a new id and its own comments', () => {
+  const dst = st().projects[1];
+  const t = project().epics[0].tasks[0];
+  st().addComment(t.id, 'Shared?');
+  st().transferTask(t.id, dst.id, dst.epics[0].id, true);
+  const copy = st().projects.find((p) => p.id === dst.id)!.epics[0].tasks.at(-1)!;
+  expect(copy).toMatchObject({ title: t.title, comments: [{ text: 'Shared?' }] });
+  expect(copy.id).not.toBe(t.id);
+  expect(project().epics[0].tasks[0].id).toBe(t.id);
+  expect(history().at(-1)).toMatchObject({ verb: 'Copied', name: t.title });
+  st().addComment(t.id, 'Only on the original');
+  expect(st().projects.find((p) => p.id === dst.id)!.epics[0].tasks.at(-1)!.comments).toHaveLength(1);
 });
 
 it('adds, edits and deletes comments, with undo for deletes', () => {

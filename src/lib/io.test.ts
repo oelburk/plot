@@ -72,9 +72,9 @@ describe('parseImport', () => {
     expect(parseImport('nope')).toEqual({ ok: false, error: "That file isn't valid JSON." });
     expect(parseImport('{"foo":1}')).toEqual({ ok: false, error: "That file isn't a Plot export. Expected a projects list." });
     expect(parseImport('[{"epics":[]}]')).toEqual({ ok: false, error: 'Project 1 needs a name and an epics list.' });
-    expect(parseImport('[{"name":"P","epics":[{"name":"E","tasks":[{"title":"T","s":3}]}]}]')).toEqual({
+    expect(parseImport('[{"name":"P","epics":[{"name":"E","tasks":[{"title":"T","s":4}]}]}]')).toEqual({
       ok: false,
-      error: 'Project 1, epic 1, task 1 needs a title and a status of 0, 1 or 2.',
+      error: 'Project 1, epic 1, task 1 needs a title and a status of 0, 1, 2 or 3.',
     });
     expect(parseImport('{"projects":[{"name":"P","epics":[]}],"disciplines":[{"code":"FE"}]}')).toEqual({
       ok: false,
@@ -92,13 +92,13 @@ describe('parseImport', () => {
     expect(parseImport('[{"name":"P","epics":[null]}]')).toMatchObject({ ok: false, error: 'Project 1, epic 1 needs a name and a tasks list.' });
     expect(parseImport('[{"name":"P","epics":[{"name":"E","tasks":[null]}]}]')).toMatchObject({
       ok: false,
-      error: 'Project 1, epic 1, task 1 needs a title and a status of 0, 1 or 2.',
+      error: 'Project 1, epic 1, task 1 needs a title and a status of 0, 1, 2 or 3.',
     });
   });
   it('rejects a string status', () => {
     expect(parseImport('[{"name":"P","epics":[{"name":"E","tasks":[{"title":"T","s":"1"}]}]}]')).toMatchObject({
       ok: false,
-      error: 'Project 1, epic 1, task 1 needs a title and a status of 0, 1 or 2.',
+      error: 'Project 1, epic 1, task 1 needs a title and a status of 0, 1, 2 or 3.',
     });
   });
   it('rejects empty names and titles', () => {
@@ -106,7 +106,7 @@ describe('parseImport', () => {
     expect(parseImport('[{"name":"P","epics":[{"name":"","tasks":[]}]}]')).toMatchObject({ ok: false, error: 'Project 1, epic 1 needs a name and a tasks list.' });
     expect(parseImport('[{"name":"P","epics":[{"name":"E","tasks":[{"title":"","s":0}]}]}]')).toMatchObject({
       ok: false,
-      error: 'Project 1, epic 1, task 1 needs a title and a status of 0, 1 or 2.',
+      error: 'Project 1, epic 1, task 1 needs a title and a status of 0, 1, 2 or 3.',
     });
     expect(parseImport('{"projects":[{"name":"P","epics":[]}],"disciplines":[{"code":"FE","tag":"FE","name":" ","hue":1}]}')).toMatchObject({
       ok: false,

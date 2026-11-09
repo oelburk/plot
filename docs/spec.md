@@ -55,7 +55,7 @@ plot/
 This matches the handoff's export format, so `src/sample-data.json` and exports from the handoff prototype import unchanged.
 
 ```ts
-type Status = 0 | 1 | 2; // TODO = 0, DOING = 1, DONE = 2 (named constants)
+type Status = 0 | 1 | 2 | 3; // TODO = 0, DOING = 1, DONE = 2, CLOSED = 3 (named constants)
 interface Discipline { code: string; tag: string; name: string; hue: number | null }
 interface Task { id: string; title: string; d: string; s: Status; notes: string }
 interface Epic { id: string; name: string; open: boolean; tasks: Task[] }
@@ -71,6 +71,12 @@ interface Project { id: string; name: string; desc: string; edited?: string; upd
 - `pct = round(done / total × 100)`, and 0 when there are no tasks. In progress counts as 0.
 - The same formula applies to the project, each epic, each discipline across the project, and each discipline within an epic.
 - The displayed pct is capped at 99 while any task is unfinished, so 199 of 200 reads 99%, never 100%. 100 means every task is done, and it renders in done-green text (only when the item has at least one task).
+
+### Closed
+
+- Closed (`3`) means a task won't be built. It stays in its epic with its notes and comments, but is left out of `total`, so it never counts towards or against progress. Task counts ("8 tasks", "10 of 38 tasks done") leave closed tasks out too; the progress legend adds a Closed count when there are any.
+- It's the fourth segment of the status toggle, with a ⊘ glyph. Closed rows have a struck-through, faint title; closed squares are outlined like Not started and struck through.
+- Hide done hides closed tasks too.
 
 ### Store (`src/store.ts`)
 
@@ -113,7 +119,7 @@ Persistence: Zustand `persist` with the localStorage key `plot.v1`. It saves the
 ### History
 
 - `Project.history?: { id, at, verb, name, to?, s? }[]`, oldest first, rendered as `{verb} {name} {to}` (for example `Marked` **Login form** `as done`). `s` is set on status changes and picks the glyph.
-- Logged: adding, renaming, deleting and moving (to another epic) tasks; status, owner and notes changes; adding, editing and deleting comments; adding, renaming and deleting epics; creating the project, and changing its name or description. Changes that change nothing are not logged. Reordering within an epic, expand/collapse and discipline settings are not logged.
+- Logged: adding, renaming, deleting and moving (to another epic or project) tasks, and copying them to another project; status, owner and notes changes; adding, editing and deleting comments; adding, renaming and deleting epics; creating the project, and changing its name or description. Changes that change nothing are not logged. Reordering within an epic, expand/collapse and discipline settings are not logged.
 - A repeat of the last line (same verb and name) within a minute replaces it, so typing notes or clicking through statuses leaves one line. History keeps the last 500 lines per project. Undoing a delete drops its line along with everything else since the delete.
 - The History button in the top bar toggles a 360px panel on the right, grouped by day (Today, Yesterday, then `Wed, Oct 28`), newest first, with the clock time on each line and the full date and time on hover. Opening an epic in the map view replaces it. Esc or × closes it and returns focus to the History button.
 - Projects created before this feature start with an empty history. JSON export includes it; import accepts it when present (each entry needs a non-empty `verb`, a `name` and an `at`); CSV leaves it out.
@@ -127,9 +133,14 @@ Persistence: Zustand `persist` with the localStorage key `plot.v1`. It saves the
 
 - It appears on epic rows (visible on hover and keyboard focus, placed in the free space before the progress bar or squares) and next to the project title (also visible on hover and keyboard focus, and while its popover is open, so the header matches the handoff at rest).
 - Task rows (tree and map panel) have one too, before the status toggle, shown the same way.
-- Items: Rename, Move up and Move down (epics and tasks, when there's somewhere to move), and Delete. Delete uses the danger text color on hover and keyboard focus.
+- Items: Rename, Move up and Move down (epics and tasks, when there's somewhere to move), Move or copy to project… (tasks, when another project has an epic), and Delete. Delete uses the danger text color on hover and keyboard focus.
 - It's styled like the palette: `#15161a`, a 1px `rgba(255,255,255,.09)` border, radius 10, the overlay shadow, and items padded 7/10 with radius 6 at 12.5px.
 - It closes on outside click, Esc, or choosing an item.
+
+### Move or copy to another project
+
+- The task ⋯ menu's **Move or copy to project…** opens a dialog with a Project and an Epic picker (other projects that have at least one epic). Copy and Move both append the task to the chosen epic and open it, keeping its status, owner, notes and comments.
+- Move takes the task out of this project; Copy leaves it and gives the copy a new id. Both show the undo toast and log a line in each project: `Moved`/`Copied` **task** `to {project}` here, `Added` **task** `to {epic} from {project}` there.
 
 ### Delete and undo
 

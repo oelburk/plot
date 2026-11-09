@@ -8,6 +8,7 @@ import { NewProject } from './screens/NewProject';
 import { Palette } from './screens/Palette';
 import { ProjectScreen } from './screens/Project';
 import { Settings } from './screens/Settings';
+import { TransferTask } from './screens/TransferTask';
 import { currentProject, useStore } from './store';
 
 export default function App() {
@@ -41,6 +42,7 @@ export default function App() {
       {overlay === 'palette' && <Palette />}
       {overlay === 'new' && <NewProject />}
       {overlay === 'edit' && <EditProject />}
+      {overlay === 'transfer' && <TransferTask />}
       <Toast />
     </div>
   );
