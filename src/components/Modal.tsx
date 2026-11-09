@@ -10,7 +10,7 @@ export function Modal({ onClose, label, width, top, className = 'rounded-16', ch
     opener.current ??= document.activeElement as HTMLElement | null;
     const d = ref.current;
     if (d && !d.open) d.showModal();
-    d?.querySelector('input')?.focus();
+    d?.querySelector<HTMLElement>('input, select')?.focus();
     // an input the closing action autofocused (a new project's add-task) must keep focus; an opener the action removed falls back to the heading
     return () => {
       const a = document.activeElement;

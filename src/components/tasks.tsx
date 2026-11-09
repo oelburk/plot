@@ -2,7 +2,8 @@ import { useState, type KeyboardEvent } from 'react';
 import { focusSoon, focusUndo, isImeKey } from '../lib/focus';
 import { fullTime, pad, relativeTime } from '../lib/format';
 import type { Epic, Task, TaskComment } from '../lib/types';
-import { useStore } from '../store';
+import { transferTargets } from '../screens/TransferTask';
+import { currentProject, useStore } from '../store';
 import { Menu } from './Menu';
 import { moveItems } from './reorder';
 import { fieldRing, OwnerPills } from './ui';
@@ -158,7 +159,8 @@ function CommentField({ value, onChange, onSubmit, onCancel, returnTo, label, pl
 }
 
 export function TaskMenu({ task, epic, visible, onRename, className = '' }: { task: Task; epic: Epic; visible: string[]; onRename: () => void; className?: string }) {
-  const { moveTask, deleteTask } = useStore.getState();
+  const { moveTask, deleteTask, patch } = useStore.getState();
+  const canTransfer = useStore((s) => transferTargets(s.projects, currentProject(s)?.id).length > 0);
   return (
     <Menu
       label={`More actions for ${task.title}`}
@@ -174,6 +176,7 @@ export function TaskMenu({ task, epic, visible, onRename, className = '' }: { ta
             focusSoon(`[data-task="${task.id}"]`);
           },
         ),
+        ...(canTransfer ? [{ label: 'Move or copy to project…', onSelect: () => patch({ overlay: 'transfer', transfer: task.id }) }] : []),
         {
           label: 'Delete task',
           danger: true,
